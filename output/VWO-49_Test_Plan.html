@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Test plan for Jira story VWO-49: adding Passkey and SSO login options to the VWO login page.">
+  <title>VWO-49 Test Plan</title>
+  <style>
+    :root {
+      --ink: #17243b;
+      --muted: #59677d;
+      --brand: #4b36c8;
+      --brand-dark: #30218f;
+      --pale: #f3f2ff;
+      --line: #dce2ed;
+      --surface: #ffffff;
+      --page: #f5f7fb;
+      --green: #13795b;
+      --amber: #8a5700;
+      --red: #a61b1b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 15px/1.6 "Segoe UI", Arial, sans-serif;
+    }
+    a { color: var(--brand-dark); overflow-wrap: anywhere; }
+    .document { max-width: 1080px; margin: 36px auto; padding: 0 24px 48px; }
+    .cover {
+      padding: 48px 52px;
+      color: white;
+      background: linear-gradient(125deg, #30218f, #5946d7 70%, #8475ed);
+      border-radius: 18px;
+      box-shadow: 0 14px 36px #30218f25;
+    }
+    .eyebrow { margin: 0 0 12px; color: #d8d2ff; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 0; font-size: clamp(30px, 5vw, 44px); line-height: 1.12; }
+    .subtitle { max-width: 720px; margin: 18px 0 26px; color: #eeecff; font-size: 17px; }
+    .cover-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; color: #eeecff; font-size: 13px; }
+    .cover-meta strong { color: white; }
+    .panel, section {
+      margin-top: 20px;
+      padding: 26px 30px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    h2 { margin: 0 0 16px; color: var(--brand-dark); font-size: 23px; line-height: 1.25; }
+    h3 { margin: 22px 0 8px; font-size: 17px; }
+    p { margin: 8px 0 12px; }
+    ul, ol { margin: 8px 0 14px; padding-left: 23px; }
+    li { margin: 4px 0; }
+    .small { color: var(--muted); font-size: 13px; }
+    .callout {
+      margin: 14px 0;
+      padding: 12px 15px;
+      background: var(--pale);
+      border-left: 4px solid var(--brand);
+      border-radius: 4px;
+    }
+    .callout.warning { background: #fff7e8; border-color: #d99a25; }
+    .callout.danger { background: #fdeeee; border-color: #c94040; }
+    .toc { columns: 2; column-gap: 36px; }
+    .toc li { break-inside: avoid; }
+    table { width: 100%; margin: 12px 0 18px; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #27334c; background: #f0f2f8; font-weight: 700; }
+    tbody tr:nth-child(even) { background: #fafbfe; }
+    th[scope="row"] { width: 26%; }
+    .nowrap { white-space: nowrap; }
+    .priority { font-weight: 700; white-space: nowrap; }
+    .priority.p0 { color: var(--red); }
+    .priority.p1 { color: var(--amber); }
+    .priority.p2 { color: var(--muted); }
+    .chip {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .chip.ok { color: var(--green); background: #e5f4ee; }
+    .chip.warn { color: var(--amber); background: #fff1d6; }
+    .chip.miss { color: var(--red); background: #fde8e8; }
+    .chip.info { color: var(--brand-dark); background: var(--pale); }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 6px; }
+    .stat { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: #fbfbff; }
+    .stat b { display: block; font-size: 26px; line-height: 1.1; color: var(--brand-dark); }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .stat.red b { color: var(--red); }
+    .stat.amber b { color: var(--amber); }
+    .ac { margin: 10px 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; }
+    .ac h4 { margin: 0 0 4px; font-size: 14px; color: var(--brand-dark); }
+    .ac ul { margin: 4px 0; }
+    .gate { border: 2px solid var(--brand); }
+    .gate h3:first-of-type { margin-top: 6px; }
+    .footer { margin-top: 22px; color: var(--muted); font-size: 12px; text-align: center; }
+    @media (max-width: 700px) {
+      .document { margin: 16px auto; padding: 0 12px 28px; }
+      .cover { padding: 32px 24px; }
+      .panel, section { padding: 20px 17px; }
+      .toc { columns: 1; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      table { display: block; overflow-x: auto; }
+    }
+    @media print {
+      @page { size: A4; margin: 14mm 12mm; }
+      body { background: white; font-size: 9.5pt; }
+      .document { max-width: none; margin: 0; padding: 0; }
+      .cover { padding: 30px; border-radius: 0; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .panel, section { margin-top: 12px; padding: 16px 18px; border-radius: 0; }
+      .panel, .ac, .stat { break-inside: avoid; }
+      h2, h3, h4 { break-after: avoid; }
+      table { font-size: 8.3pt; }
+      thead { display: table-header-group; }
+      tr { break-inside: avoid; }
+      .chip, .stat, th, tbody tr, .callout { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <header class="cover">
+      <p class="eyebrow">Quality Assurance · Test Plan</p>
+      <h1>VWO-49: Passkey and SSO Login Options</h1>
+      <p class="subtitle">Test plan for adding “Sign in using SSO” and “Sign in with Passkey” to the VWO login page, alongside the existing sign-in methods.</p>
+      <div class="cover-meta">
+        <span><strong>Jira:</strong> VWO-49 (Story)</span>
+        <span><strong>Version:</strong> 1.0 – Draft</span>
+        <span><strong>Prepared:</strong> 19 November 2026</span>
+        <span><strong>Source:</strong> Jira export of VWO-49, generated 25 Oct 2026</span>
+      </div>
+    </header>
+
+    <div class="panel">
+      <div class="callout warning" style="margin-top:0">
+        <strong>Status: DRAFT – pending human review.</strong> Not approved until a QA owner signs off. Items the ticket does not define are marked <span class="chip warn">TBC</span> (to be confirmed) and listed in section 4. They have not been guessed.
+      </div>
+      <h2>Document control</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">Jira issue</th><td>VWO-49 – [VWO] Add Passkey and SSO Login Options to VWO Login Page<br><a href="https://bugzz.atlassian.net/browse/VWO-49">https://bugzz.atlassian.net/browse/VWO-49</a></td></tr>
+          <tr><th scope="row">Project / Epic</th><td>VWO Project · Epic: Authentication Enhancements</td></tr>
+          <tr><th scope="row">Type / Status / Resolution</th><td>Story · To Do · Unresolved</td></tr>
+          <tr><th scope="row">Priority</th><td>Jira field: <strong>Medium</strong> · Description: <strong>High</strong> · Bug-triage comment: <strong>P0</strong>, severity minor <span class="chip miss">Conflict – see G-01</span></td></tr>
+          <tr><th scope="row">Reporter / Assignee</th><td>Pramod · Unassigned</td></tr>
+          <tr><th scope="row">Created / Updated</th><td>19 Apr 2026 · 20 Oct 2026</td></tr>
+          <tr><th scope="row">Components, versions, labels</th><td>Components: None · Affects versions: None · Fix versions: None · Labels: None</td></tr>
+          <tr><th scope="row">Sprint / Estimates</th><td>Sprint: not set · Original estimate, remaining estimate, time spent: Not specified</td></tr>
+          <tr><th scope="row">Product context</th><td>VWO (vwo.com) is an A/B testing platform. The login page is the entry point for all users.</td></tr>
+          <tr><th scope="row">Plan owner / approvers</th><td><span class="chip warn">TBC</span> The ticket is unassigned. A QA owner must be named before sign-off.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="panel" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol class="toc">
+        <li><a href="#objective">Objective</a></li>
+        <li><a href="#scope">Scope and inclusions</a></li>
+        <li><a href="#requirement">Requirement summary (from VWO-49)</a></li>
+        <li><a href="#gaps">Gaps and questions for the author</a></li>
+        <li><a href="#strategy">Test strategy</a></li>
+        <li><a href="#scenarios">Test scenarios</a></li>
+        <li><a href="#traceability">Requirement traceability</a></li>
+        <li><a href="#environment">Test environments</a></li>
+        <li><a href="#data">Test data, roles and permissions</a></li>
+        <li><a href="#history">Ticket history and automation status</a></li>
+        <li><a href="#defects">Defect reporting procedure</a></li>
+        <li><a href="#schedule">Test schedule and resource allocation</a></li>
+        <li><a href="#deliverables">Test deliverables</a></li>
+        <li><a href="#criteria">Entry and exit criteria</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#risks">Risks, assumptions and mitigations</a></li>
+        <li><a href="#approvals">Approvals</a></li>
+        <li><a href="#gate">Human review gate</a></li>
+      </ol>
+    </nav>
+
+    <section id="objective">
+      <h2>1. Objective</h2>
+      <p>Confirm that users can sign in to VWO with <strong>Single Sign-On (SSO)</strong> or a <strong>Passkey</strong> from the login page. The plan checks that:</p>
+      <ul>
+        <li>both new buttons appear in the right place</li>
+        <li>successful sign-ins land on the dashboard</li>
+        <li>every failure shows a clear message</li>
+        <li>the flows work on supported browsers and devices and with every configured identity provider</li>
+        <li>the flows are secure (OAuth/SAML/WebAuthn, with no sensitive data exposed)</li>
+        <li>existing sign-in methods keep working</li>
+      </ul>
+      <p><strong>What “tested” means for VWO-49:</strong> all six acceptance criteria are verified, the seven test scenarios listed in the ticket are executed, and the ticket’s Definition of Done is met (deployed to staging, QA sign-off, no critical or high defects open, documentation updated).</p>
+      <div class="stats" role="list">
+        <div class="stat" role="listitem"><b>6</b><span>Acceptance criteria</span></div>
+        <div class="stat" role="listitem"><b>27</b><span>Planned test scenarios (12 at P0)</span></div>
+        <div class="stat amber" role="listitem"><b>19</b><span>Open questions for the author</span></div>
+        <div class="stat red" role="listitem"><b>0 / 24</b><span>Automated checks executed in 6 runs (all blocked)</span></div>
+      </div>
+    </section>
+
+    <section id="scope">
+      <h2>2. Scope and inclusions</h2>
+      <h3>In scope</h3>
+      <ul>
+        <li><strong>UI visibility:</strong> “Sign in using SSO” and “Sign in with Passkey” buttons, their labels, and their position below “Sign in with Google”.</li>
+        <li><strong>SSO login flow:</strong> successful authentication and redirect to the dashboard, invalid credentials, and failed SSO authentication across all configured identity providers.</li>
+        <li><strong>Passkey login flow:</strong> sign-in with a registered, verified passkey and redirect to the dashboard; the fallback or guidance message when no passkey is available; passkey authentication failure.</li>
+        <li><strong>Error handling:</strong> messages for failed SSO, passkey failure, and an unsupported browser or device.</li>
+        <li><strong>Compatibility:</strong> passkey login on supported browsers and devices only; SSO across configured identity providers.</li>
+        <li><strong>Security:</strong> OAuth/SAML/WebAuthn protocols; no sensitive data in the UI or network logs.</li>
+        <li><strong>UI responsiveness and accessibility</strong> of the new options (ticket scenario 7).</li>
+        <li><strong>Regression:</strong> existing sign-in methods (email/password and “Sign in with Google”) that sit next to the new options.</li>
+      </ul>
+      <h3>Inclusions (test types applied)</h3>
+      <ul>
+        <li>Functional and UI testing of both new flows (positive, negative and boundary)</li>
+        <li>Error-handling and message validation</li>
+        <li>Compatibility testing across the agreed browser and device matrix</li>
+        <li>Security checks of the protocol use and data exposure</li>
+        <li>Responsiveness and accessibility checks</li>
+        <li>Smoke, sanity, regression and retesting</li>
+        <li>Exploratory and end-to-end testing (login page to dashboard)</li>
+        <li>Automated regression: repair and extend the existing n8n + Playwright run (TC-01 to TC-04)</li>
+      </ul>
+      <h3>Out of scope (as stated in VWO-49)</h3>
+      <ul>
+        <li>Passkey registration flow (covered in a separate story)</li>
+        <li>SSO provider configuration</li>
+      </ul>
+      <p class="small">Also out of scope unless the author adds them: performance/load targets, localisation, and dashboard features beyond confirming a successful landing. The ticket defines none of these (see G-13).</p>
+    </section>
+
+    <section id="requirement">
+      <h2>3. Requirement summary (from VWO-49)</h2>
+      <h3>User story</h3>
+      <p class="callout">As a user, I want to log in using either Passkey or Single Sign-On (SSO), so that I can access my account more securely and conveniently without relying solely on email/password authentication.</p>
+      <p>The ticket says two new options, “Sign in using SSO” and “Sign in with Passkey”, have been added to the login page next to the existing authentication methods. They should work seamlessly and give a smooth user experience across supported environments.</p>
+
+      <h3>Acceptance criteria</h3>
+      <div class="ac"><h4>AC1 – UI visibility</h4><ul><li>GIVEN the user is on the login page, THEN “Sign in using SSO” and “Sign in with Passkey” are visible, AND they are displayed below the “Sign in with Google” option.</li></ul></div>
+      <div class="ac"><h4>AC2 – SSO login flow</h4><ul><li>GIVEN the user clicks “Sign in using SSO”, WHEN valid SSO credentials are provided, THEN the user is authenticated and redirected to the dashboard, AND appropriate error messages are shown for invalid credentials.</li></ul></div>
+      <div class="ac"><h4>AC3 – Passkey login flow</h4><ul><li>GIVEN the user clicks “Sign in with Passkey”, WHEN a registered passkey is available and verified, THEN the user is logged in AND redirected to the dashboard, AND if no passkey is available a fallback or guidance message is displayed.</li></ul></div>
+      <div class="ac"><h4>AC4 – Error handling</h4><ul><li>Proper error messages for: failed SSO authentication; passkey authentication failure; unsupported browser/device for passkeys.</li></ul></div>
+      <div class="ac"><h4>AC5 – Compatibility</h4><ul><li>Passkey login works on supported browsers/devices only. SSO works across all configured identity providers.</li></ul></div>
+      <div class="ac"><h4>AC6 – Security</h4><ul><li>All authentication flows follow secure protocols (OAuth/SAML/WebAuthn). No sensitive data is exposed in the UI or network logs.</li></ul></div>
+
+      <h3>Test scenarios listed in the ticket</h3>
+      <ol>
+        <li>Verify both new buttons are visible and correctly positioned</li>
+        <li>Validate successful login via SSO</li>
+        <li>Validate failed SSO login with incorrect credentials</li>
+        <li>Validate successful login via Passkey</li>
+        <li>Validate behaviour when no passkey is registered</li>
+        <li>Validate behaviour on unsupported browsers/devices</li>
+        <li>Verify UI responsiveness and accessibility</li>
+      </ol>
+
+      <h3>Definition of Done</h3>
+      <ul>
+        <li>Feature implemented and deployed to staging</li>
+        <li>All acceptance criteria met</li>
+        <li>QA sign-off completed</li>
+        <li>No critical or high defects open</li>
+        <li>Documentation updated</li>
+      </ul>
+    </section>
+
+    <section id="gaps">
+      <h2>4. Gaps and questions for the author</h2>
+      <p>VWO-49 was scored against the requirement gap-analysis checklist: <span class="chip ok">✅ present</span> <span class="chip warn">⚠️ ambiguous</span> <span class="chip miss">❌ missing</span>. Each ⚠️ or ❌ becomes a question for the reporter.</p>
+      <div class="stats" role="list">
+        <div class="stat" role="listitem"><b>22</b><span>Checklist items scored</span></div>
+        <div class="stat" role="listitem"><b>1</b><span>✅ Present</span></div>
+        <div class="stat amber" role="listitem"><b>13</b><span>⚠️ Ambiguous</span></div>
+        <div class="stat red" role="listitem"><b>8</b><span>❌ Missing</span></div>
+      </div>
+
+      <h3>4.1 Checklist score</h3>
+      <table>
+        <thead><tr><th scope="col">Area</th><th scope="col">Checklist item</th><th scope="col">Score</th><th scope="col">Gap</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="6">Functional</td><td>Clear user story / goal</td><td><span class="chip ok">✅</span></td><td>–</td></tr>
+          <tr><td>Acceptance criteria testable</td><td><span class="chip warn">⚠️</span></td><td>G-06, G-07</td></tr>
+          <tr><td>Happy path fully described</td><td><span class="chip warn">⚠️</span></td><td>G-05</td></tr>
+          <tr><td>Negative / error paths described</td><td><span class="chip warn">⚠️</span></td><td>G-06</td></tr>
+          <tr><td>Boundary and empty states</td><td><span class="chip warn">⚠️</span></td><td>G-11</td></tr>
+          <tr><td>State transitions / workflow steps</td><td><span class="chip miss">❌</span></td><td>G-05, G-11</td></tr>
+          <tr><td rowspan="4">Data &amp; environment</td><td>Required test data specified</td><td><span class="chip miss">❌</span></td><td>G-16</td></tr>
+          <tr><td>Environment / config / feature flags named</td><td><span class="chip warn">⚠️</span></td><td>G-03</td></tr>
+          <tr><td>External dependencies and integrations listed</td><td><span class="chip warn">⚠️</span></td><td>G-09, G-15</td></tr>
+          <tr><td>Preconditions / setup stated</td><td><span class="chip warn">⚠️</span></td><td>G-15</td></tr>
+          <tr><td rowspan="5">Non-functional</td><td>Performance / load expectations</td><td><span class="chip miss">❌</span></td><td>G-13</td></tr>
+          <tr><td>Security / authorisation (roles)</td><td><span class="chip warn">⚠️</span></td><td>G-10, G-16</td></tr>
+          <tr><td>Accessibility expectations</td><td><span class="chip warn">⚠️</span></td><td>G-12</td></tr>
+          <tr><td>Internationalisation / localisation</td><td><span class="chip miss">❌</span></td><td>G-13</td></tr>
+          <tr><td>Audit / logging / observability</td><td><span class="chip miss">❌</span></td><td>G-13</td></tr>
+          <tr><td rowspan="4">Cross-cutting</td><td>Impact on existing features (regression)</td><td><span class="chip warn">⚠️</span></td><td>G-04</td></tr>
+          <tr><td>Backward compatibility / migration</td><td><span class="chip miss">❌</span></td><td>G-14</td></tr>
+          <tr><td>Mobile / responsive / browser matrix</td><td><span class="chip warn">⚠️</span></td><td>G-08</td></tr>
+          <tr><td>Rollback / feature-flag behaviour</td><td><span class="chip miss">❌</span></td><td>G-14</td></tr>
+          <tr><td rowspan="3">Clarity</td><td>No ambiguous wording</td><td><span class="chip warn">⚠️</span></td><td>G-06, G-07, G-17</td></tr>
+          <tr><td>Terms defined consistently</td><td><span class="chip warn">⚠️</span></td><td>G-01, G-02</td></tr>
+          <tr><td>Mockups / designs linked</td><td><span class="chip miss">❌</span></td><td>G-04</td></tr>
+        </tbody>
+      </table>
+
+      <h3>4.2 Questions for the ticket author</h3>
+      <table>
+        <thead><tr><th scope="col">#</th><th scope="col">Area</th><th scope="col">Finding</th><th scope="col">Question to author</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap">G-01</td><td>Priority</td><td><span class="chip warn">⚠️</span> Three different priorities: Jira field Medium, description High, triage comment “severity minor, priority P0”.</td><td>Which priority is authoritative for scheduling and defect triage?</td></tr>
+          <tr><td class="nowrap">G-02</td><td>Ticket state</td><td><span class="chip warn">⚠️</span> The description says the options “have been added”, but the status is To Do. The comments use bug language (“not able to reproduce”, “Bug Triage”) on a Story.</td><td>Is the feature built and deployed? If so, where? What was “not able to reproduce” referring to?</td></tr>
+          <tr><td class="nowrap">G-03</td><td>Environment</td><td><span class="chip warn">⚠️</span> The DoD requires staging, but the automated runs targeted https://app.vwo.com and https://app.wingify.com/#/login. No feature flag is named.</td><td>What is the staging URL? Is the feature behind a flag? Which URL should automation target?</td></tr>
+          <tr><td class="nowrap">G-04</td><td>AC1 – UI</td><td><span class="chip warn">⚠️</span> The buttons must sit below “Sign in with Google”, but their order relative to each other is not stated (automation expects “correct order”). No mockup is linked.</td><td>What are the required order, styling and icons? Please link the approved design. Must the existing methods stay unchanged?</td></tr>
+          <tr><td class="nowrap">G-05</td><td>AC2 – SSO flow</td><td><span class="chip warn">⚠️</span> The SSO steps are not described (e.g. email or company-domain entry first, redirect or pop-up, return path).</td><td>Please describe the SSO journey step by step from the click to the dashboard.</td></tr>
+          <tr><td class="nowrap">G-06</td><td>AC2/AC4 – Errors</td><td><span class="chip warn">⚠️</span> The ticket asks for “appropriate” and “proper” error messages but gives no wording. Automation TC-03 expects “Invalid credentials”.</td><td>What is the exact message text for each failure: invalid SSO credentials, failed SSO, passkey failure, unsupported browser/device?</td></tr>
+          <tr><td class="nowrap">G-07</td><td>AC3 – Fallback</td><td><span class="chip warn">⚠️</span> “A fallback or guidance message” does not say what the fallback is.</td><td>When no passkey is available, what should appear, and is the user offered another sign-in method?</td></tr>
+          <tr><td class="nowrap">G-08</td><td>AC5 – Passkey support</td><td><span class="chip miss">❌</span> “Supported browsers/devices” is not listed, and neither are unsupported ones.</td><td>Please provide the passkey support matrix and name an unsupported browser/device for the negative test.</td></tr>
+          <tr><td class="nowrap">G-09</td><td>AC5 – Identity providers</td><td><span class="chip miss">❌</span> The ticket does not list the identity providers covered by “all configured identity providers”.</td><td>Which identity providers are configured, which protocol (OAuth or SAML) does each use, and who supplies test accounts?</td></tr>
+          <tr><td class="nowrap">G-10</td><td>AC6 – Security</td><td><span class="chip warn">⚠️</span> The ticket does not define “sensitive data” or say which “network logs” are meant.</td><td>Which data counts as sensitive, and which logs are in scope (browser network traffic, server logs, both)?</td></tr>
+          <tr><td class="nowrap">G-11</td><td>Edge cases</td><td><span class="chip miss">❌</span> No expected behaviour is given for: a cancelled identity-provider or passkey prompt, a timeout, an SSO user not provisioned in VWO, an identity provider that is down, multiple passkeys, or a deep link before login.</td><td>What is the expected result for each of these cases?</td></tr>
+          <tr><td class="nowrap">G-12</td><td>Accessibility</td><td><span class="chip warn">⚠️</span> Ticket scenario 7 asks for accessibility testing, but no standard is named.</td><td>Which standard applies? The VWO Login Dashboard PRD uses WCAG 2.1 AA. Does that apply here too?</td></tr>
+          <tr><td class="nowrap">G-13</td><td>Non-functional</td><td><span class="chip miss">❌</span> No performance, localisation, or audit/logging expectations.</td><td>Are there response-time targets, translated labels, or audit events for SSO/passkey logins?</td></tr>
+          <tr><td class="nowrap">G-14</td><td>Rollout</td><td><span class="chip miss">❌</span> No rollback, feature-flag or migration behaviour is described.</td><td>How is the feature switched on or rolled back, and what do users see if it is turned off?</td></tr>
+          <tr><td class="nowrap">G-15</td><td>Dependency</td><td><span class="chip warn">⚠️</span> Passkey registration is in a separate story, but passkey login cannot be tested without registered passkeys.</td><td>Which story covers registration, is it done, and how do testers get passkey-registered accounts?</td></tr>
+          <tr><td class="nowrap">G-16</td><td>Data and roles</td><td><span class="chip miss">❌</span> No test accounts or user roles are given.</td><td>Do all user roles see the new buttons? Who provides the test accounts?</td></tr>
+          <tr><td class="nowrap">G-17</td><td>Clarity</td><td><span class="chip warn">⚠️</span> The description ends with leftover generated text (“If you want, I can also generate test cases…”). The triage comment names an unspecified “XYZ module” as a risk.</td><td>Can the leftover text be removed? Which module is the risk?</td></tr>
+          <tr><td class="nowrap">G-18</td><td>Automation</td><td><span class="chip warn">⚠️</span> All 6 automated runs blocked all 4 checks, with an empty “Actual” field.</td><td>Why are the runs blocked (feature not deployed, a login wall, bot protection, a missing account)?</td></tr>
+          <tr><td class="nowrap">G-19</td><td>Planning</td><td><span class="chip miss">❌</span> No sprint, assignee, estimate or fix version.</td><td>Which sprint and release is this targeted for, and who is the developer and QA owner?</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="strategy">
+      <h2>5. Test strategy</h2>
+      <h3>Step 1 – Design scenarios and test cases</h3>
+      <p>Test scenarios (section 6) are derived from the acceptance criteria, the ticket’s own scenarios and the gaps in section 4. Test cases will be written after this plan is approved, using:</p>
+      <ul>
+        <li><strong>Equivalence class partitioning:</strong> valid and invalid SSO credentials; passkey registered or not; supported and unsupported browsers.</li>
+        <li><strong>Boundary value analysis:</strong> zero, one or several registered passkeys; prompt timeout.</li>
+        <li><strong>Decision table testing:</strong> sign-in method × identity provider × browser/device × account state.</li>
+        <li><strong>State transition testing:</strong> login page → identity provider or passkey prompt → dashboard, or back to the login page with an error.</li>
+        <li><strong>Use case testing:</strong> the end-to-end journeys for SSO and passkey users.</li>
+        <li><strong>Error guessing and exploratory testing:</strong> cancel, retry, double-click and browser Back during each flow.</li>
+      </ul>
+      <p>Test cases are prioritised P0 to P2. P0 covers the acceptance criteria and security; P1 covers secondary paths; P2 covers boundary cases.</p>
+
+      <h3>Step 2 – Testing procedure for each build</h3>
+      <ul>
+        <li><strong>Smoke test first:</strong> the login page loads and both new buttons are visible and clickable. If the smoke test fails, the build is rejected and in-depth testing waits for a stable build.</li>
+        <li><strong>In-depth testing</strong> starts on a stable build, using the approved test cases. Several testers can cover different browsers and devices in parallel.</li>
+        <li>Defects are logged in JIRA and linked to VWO-49. An end-of-day status email goes to development management.</li>
+        <li><strong>Test types:</strong> smoke and sanity · functional and UI · regression and retesting · usability · compatibility · security · accessibility.</li>
+        <li>Test cycles repeat until the exit criteria are met.</li>
+      </ul>
+
+      <h3>Step 3 – Best practices</h3>
+      <ul>
+        <li><strong>Context-driven testing:</strong> focus on authentication risk; P0 covers sign-in success, failure handling and data exposure.</li>
+        <li><strong>Shift-left testing:</strong> the questions in section 4 go to the author before the build, so expected results are agreed early.</li>
+        <li><strong>Exploratory testing</strong> alongside scripted execution, as the triage comment also proposes (functional and non-functional testing, with manual techniques such as boundary values).</li>
+        <li><strong>End-to-end flow testing:</strong> login page → identity provider or passkey → dashboard → logout.</li>
+      </ul>
+
+      <h3>Automation approach</h3>
+      <p>The existing n8n + Playwright MCP run (TC-01 to TC-04) is the starting point. Before it is extended to the other P0 scenarios, the reason all four checks are blocked must be found and fixed (G-18). How to automate passkey prompts and identity-provider log-ins is still to be agreed <span class="chip warn">TBC</span>. Until then, those scenarios are executed manually.</p>
+    </section>
+
+    <section id="scenarios">
+      <h2>6. Test scenarios</h2>
+      <p class="small">Expected results marked “per G-xx” depend on an answer in section 4. TC-xx refers to the existing automated checks.</p>
+      <table>
+        <thead><tr><th scope="col">ID</th><th scope="col">Priority</th><th scope="col">Type</th><th scope="col">Scenario</th><th scope="col">Expected result</th><th scope="col">Maps to</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap">TS-01</td><td class="priority p0">P0</td><td>Positive · UI</td><td>Open the VWO login page.</td><td>“Sign in using SSO” and “Sign in with Passkey” buttons are visible.</td><td>AC1 · Ticket #1 · TC-01</td></tr>
+          <tr><td class="nowrap">TS-02</td><td class="priority p1">P1</td><td>Positive · UI</td><td>Check where the new buttons are placed.</td><td>Both appear below “Sign in with Google”, in the order of the approved design (per G-04).</td><td>AC1 · Ticket #1 · TC-01</td></tr>
+          <tr><td class="nowrap">TS-03</td><td class="priority p1">P1</td><td>Positive · UI</td><td>Check the button labels.</td><td>The labels read exactly “Sign in using SSO” and “Sign in with Passkey”.</td><td>AC1</td></tr>
+          <tr><td class="nowrap">TS-04</td><td class="priority p1">P1</td><td>Positive · Responsive</td><td>View the login page at desktop, tablet and mobile widths.</td><td>The buttons stay visible, aligned and clickable, with no overlap or truncated text.</td><td>Ticket #7</td></tr>
+          <tr><td class="nowrap">TS-05</td><td class="priority p1">P1</td><td>Positive · A11y</td><td>Use the login page with the keyboard only.</td><td>Both buttons can be reached with Tab and activated with Enter or Space, and the focus indicator is visible.</td><td>Ticket #7 · G-12</td></tr>
+          <tr><td class="nowrap">TS-06</td><td class="priority p1">P1</td><td>Positive · A11y</td><td>Use a screen reader on the login page.</td><td>Each button is announced with its name and role.</td><td>Ticket #7 · G-12</td></tr>
+          <tr><td class="nowrap">TS-07</td><td class="priority p0">P0</td><td>Positive · SSO</td><td>Click “Sign in using SSO” and sign in with valid credentials at the identity provider.</td><td>The user is authenticated and redirected to the dashboard (TC-02 expects the URL to contain “/dashboard”; confirm).</td><td>AC2 · Ticket #2 · TC-02</td></tr>
+          <tr><td class="nowrap">TS-08</td><td class="priority p0">P0</td><td>Positive · SSO</td><td>Repeat TS-07 for every configured identity provider.</td><td>Every identity provider gives the same result as TS-07.</td><td>AC5 · G-09</td></tr>
+          <tr><td class="nowrap">TS-09</td><td class="priority p0">P0</td><td>Negative · SSO</td><td>Attempt SSO with invalid credentials.</td><td>An error message is shown (text per G-06; TC-03 expects “Invalid credentials”). The user stays on the login page and no session is created.</td><td>AC2 · AC4 · Ticket #3 · TC-03</td></tr>
+          <tr><td class="nowrap">TS-10</td><td class="priority p1">P1</td><td>Negative · SSO</td><td>Cancel or close the window at the identity-provider step.</td><td>The user returns to the VWO login page with no session. Message per G-11.</td><td>G-11</td></tr>
+          <tr><td class="nowrap">TS-11</td><td class="priority p1">P1</td><td>Negative · SSO</td><td>Sign in through the identity provider as a user who is not provisioned in VWO.</td><td>The failed-SSO error is shown and access is denied.</td><td>AC4 · G-11</td></tr>
+          <tr><td class="nowrap">TS-12</td><td class="priority p1">P1</td><td>Negative · SSO</td><td>The identity provider is unavailable or returns an error.</td><td>The failed-SSO error is shown and the login page stays usable.</td><td>AC4 · G-11</td></tr>
+          <tr><td class="nowrap">TS-13</td><td class="priority p1">P1</td><td>Security · SSO</td><td>Replay or tamper with the SSO response (modified or expired assertion/state).</td><td>The response is rejected and the user is not authenticated.</td><td>AC6</td></tr>
+          <tr><td class="nowrap">TS-14</td><td class="priority p0">P0</td><td>Positive · Passkey</td><td>Click “Sign in with Passkey” on a device with a registered passkey and complete verification.</td><td>The user is logged in and redirected to the dashboard.</td><td>AC3 · Ticket #4</td></tr>
+          <tr><td class="nowrap">TS-15</td><td class="priority p0">P0</td><td>Negative · Passkey</td><td>Click “Sign in with Passkey” for an account or device with no passkey.</td><td>The fallback or guidance message is shown (content per G-07) and the user stays on the login page.</td><td>AC3 · Ticket #5 · TC-04</td></tr>
+          <tr><td class="nowrap">TS-16</td><td class="priority p0">P0</td><td>Negative · Passkey</td><td>Fail passkey verification (wrong PIN or biometric, or the wrong passkey).</td><td>The passkey-failure error is shown and the user is not logged in.</td><td>AC4</td></tr>
+          <tr><td class="nowrap">TS-17</td><td class="priority p1">P1</td><td>Negative · Passkey</td><td>Cancel the browser’s passkey prompt.</td><td>The user returns to the login page with no session. Message per G-11.</td><td>G-11</td></tr>
+          <tr><td class="nowrap">TS-18</td><td class="priority p2">P2</td><td>Boundary · Passkey</td><td>Let the passkey prompt time out.</td><td>Handled like a failure or cancel, and the login page stays usable.</td><td>G-11</td></tr>
+          <tr><td class="nowrap">TS-19</td><td class="priority p2">P2</td><td>Boundary · Passkey</td><td>Sign in with an account that has more than one registered passkey.</td><td>The user can pick a passkey and sign in.</td><td>G-11</td></tr>
+          <tr><td class="nowrap">TS-20</td><td class="priority p0">P0</td><td>Negative · Compat</td><td>On an unsupported browser or device, click “Sign in with Passkey”.</td><td>The unsupported browser/device message is shown.</td><td>AC4 · AC5 · Ticket #6</td></tr>
+          <tr><td class="nowrap">TS-21</td><td class="priority p1">P1</td><td>Positive · Compat</td><td>Run TS-14 on each supported browser and device in the matrix.</td><td>Passkey login succeeds on each one.</td><td>AC5 · G-08</td></tr>
+          <tr><td class="nowrap">TS-22</td><td class="priority p0">P0</td><td>Security</td><td>Inspect the UI, browser console and network traffic during every SSO and passkey flow, both success and failure.</td><td>No credentials, tokens or personal data are exposed in the UI, URLs, console or network logs beyond what the protocol requires (definition per G-10).</td><td>AC6</td></tr>
+          <tr><td class="nowrap">TS-23</td><td class="priority p0">P0</td><td>Security</td><td>Check the protocol used by each flow.</td><td>SSO uses OAuth or SAML and passkey uses WebAuthn, all over HTTPS.</td><td>AC6</td></tr>
+          <tr><td class="nowrap">TS-24</td><td class="priority p1">P1</td><td>Security</td><td>Compare the error messages for failed attempts on different accounts.</td><td>Messages do not reveal account existence or identity-provider configuration details.</td><td>AC6</td></tr>
+          <tr><td class="nowrap">TS-25</td><td class="priority p0">P0</td><td>Regression</td><td>Sign in with email and password.</td><td>Works as before.</td><td>Description (“alongside existing methods”)</td></tr>
+          <tr><td class="nowrap">TS-26</td><td class="priority p0">P0</td><td>Regression</td><td>Sign in with “Sign in with Google”.</td><td>Works as before, and the button stays above the new options.</td><td>AC1 · Description</td></tr>
+          <tr><td class="nowrap">TS-27</td><td class="priority p1">P1</td><td>Regression · Security</td><td>After an SSO or passkey sign-in, log out, then press the browser Back button.</td><td>The session has ended and the dashboard cannot be reached without signing in again.</td><td>AC6 · G-11</td></tr>
+        </tbody>
+      </table>
+      <p class="small">Totals: 27 scenarios – 12 at P0, 13 at P1, 2 at P2.</p>
+    </section>
+
+    <section id="traceability">
+      <h2>7. Requirement traceability</h2>
+      <table>
+        <thead><tr><th scope="col">Requirement</th><th scope="col">Summary</th><th scope="col">Scenarios</th></tr></thead>
+        <tbody>
+          <tr><td>AC1</td><td>UI visibility and position below “Sign in with Google”</td><td>TS-01, TS-02, TS-03, TS-26</td></tr>
+          <tr><td>AC2</td><td>SSO success → dashboard; error for invalid credentials</td><td>TS-07, TS-09</td></tr>
+          <tr><td>AC3</td><td>Passkey success → dashboard; fallback when no passkey</td><td>TS-14, TS-15</td></tr>
+          <tr><td>AC4</td><td>Errors: failed SSO, passkey failure, unsupported browser/device</td><td>TS-09, TS-11, TS-12, TS-16, TS-20</td></tr>
+          <tr><td>AC5</td><td>Passkey on supported browsers/devices only; SSO across all identity providers</td><td>TS-08, TS-20, TS-21</td></tr>
+          <tr><td>AC6</td><td>OAuth/SAML/WebAuthn; no sensitive data in UI or network logs</td><td>TS-13, TS-22, TS-23, TS-24, TS-27</td></tr>
+          <tr><td>Ticket scenarios 1–7</td><td>As listed in VWO-49</td><td>#1 → TS-01/02 · #2 → TS-07 · #3 → TS-09 · #4 → TS-14 · #5 → TS-15 · #6 → TS-20 · #7 → TS-04/05/06</td></tr>
+          <tr><td>Automated TC-01–04</td><td>Existing n8n + Playwright checks</td><td>TC-01 → TS-01/02 · TC-02 → TS-07 · TC-03 → TS-09 · TC-04 → TS-15</td></tr>
+          <tr><td>Gaps (G-11)</td><td>Edge cases not covered by the acceptance criteria</td><td>TS-10, TS-11, TS-12, TS-17, TS-18, TS-19, TS-27</td></tr>
+          <tr><td>Definition of Done</td><td>Staging deploy, AC met, QA sign-off, no critical/high defects, docs updated</td><td>Exit criteria (section 14)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="environment">
+      <h2>8. Test environments</h2>
+      <table>
+        <thead><tr><th scope="col">Name</th><th scope="col">URL</th><th scope="col">Use / notes</th></tr></thead>
+        <tbody>
+          <tr><td>Staging</td><td><span class="chip warn">TBC</span></td><td>Primary test environment: the Definition of Done requires deployment here. URL and feature flag still to be confirmed (G-03).</td></tr>
+          <tr><td>VWO app</td><td>https://app.vwo.com</td><td>Target of 4 of the 6 automated runs. Confirm whether testing here is allowed and whether the feature is live (G-02, G-03).</td></tr>
+          <tr><td>Wingify login</td><td>https://app.wingify.com/#/login</td><td>Target of the automated runs on 13 Oct and 20 Oct. Confirm how it relates to app.vwo.com.</td></tr>
+        </tbody>
+      </table>
+      <h3>Browser and device matrix (company standard)</h3>
+      <ul>
+        <li>Windows 10 – Chrome, Firefox and Edge</li>
+        <li>macOS – Safari</li>
+        <li>Android – Chrome</li>
+        <li>iPhone (iOS) – Safari</li>
+      </ul>
+      <p>Which of these combinations support passkeys, and which unsupported browser or device to use for TS-20, must come from the product team (G-08). SSO is tested on every combination in the matrix.</p>
+      <h3>Other environment needs</h3>
+      <ul>
+        <li>Devices with a platform authenticator (biometric or PIN) and passkeys registered for the test accounts</li>
+        <li>Test tenants or accounts on each configured identity provider (G-09)</li>
+        <li>Wi-Fi and cellular connections for the mobile tests</li>
+        <li>Testers have access to staging and to browser developer tools for network inspection (TS-22)</li>
+      </ul>
+    </section>
+
+    <section id="data">
+      <h2>9. Test data, roles and permissions</h2>
+      <table>
+        <thead><tr><th scope="col">Data set</th><th scope="col">Used by</th><th scope="col">Source</th></tr></thead>
+        <tbody>
+          <tr><td>Valid SSO account for each configured identity provider</td><td>TS-07, TS-08, TS-22, TS-23</td><td><span class="chip warn">TBC</span> identity-provider admin (G-09)</td></tr>
+          <tr><td>Invalid SSO credentials; an identity-provider user not provisioned in VWO</td><td>TS-09, TS-11, TS-24</td><td>QA, derived from the above</td></tr>
+          <tr><td>VWO account with one registered passkey</td><td>TS-14, TS-16, TS-17, TS-18, TS-21</td><td>Needs the passkey registration story (G-15)</td></tr>
+          <tr><td>VWO account with several registered passkeys</td><td>TS-19</td><td>Needs the passkey registration story (G-15)</td></tr>
+          <tr><td>VWO account with no passkey</td><td>TS-15</td><td>QA</td></tr>
+          <tr><td>Email/password account and Google account</td><td>TS-25, TS-26</td><td>QA</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li><strong>Roles / permissions:</strong> <span class="chip warn">TBC</span> The ticket does not say whether every VWO user role sees the new options (G-16).</li>
+        <li>Use dedicated test accounts only. Never use real customer credentials or personal data.</li>
+        <li>Keep test credentials in the team’s secret store. Do not put passwords, tokens or assertions in test cases, defect reports, screenshots or HAR files.</li>
+      </ul>
+    </section>
+
+    <section id="history">
+      <h2>10. Ticket history and automation status</h2>
+      <div class="callout danger"><strong>No automated check has produced a result yet.</strong> All 6 runs (10–20 Oct 2026) ended INCONCLUSIVE: 0 passed, 0 failed, 4 blocked. The “Actual” field is empty every time (G-18).</div>
+      <h3>Automated runs (n8n + Playwright MCP)</h3>
+      <table>
+        <thead><tr><th scope="col">Run (UTC)</th><th scope="col">App URL</th><th scope="col">Verdict</th><th scope="col">Passed / Failed / Blocked</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap">10 Oct 2026 14:09</td><td>app.vwo.com</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+          <tr><td class="nowrap">10 Oct 2026 15:32</td><td>https://app.vwo.com</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+          <tr><td class="nowrap">13 Oct 2026 14:26</td><td>app.vwo.com</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+          <tr><td class="nowrap">13 Oct 2026 15:29</td><td>https://app.wingify.com/#/login</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+          <tr><td class="nowrap">17 Oct 2026 15:02</td><td>https://app.vwo.com</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+          <tr><td class="nowrap">20 Oct 2026 15:38</td><td>https://app.wingify.com/#/login</td><td><span class="chip warn">INCONCLUSIVE</span></td><td>0 / 0 / 4</td></tr>
+        </tbody>
+      </table>
+      <h3>Automated checks in every run</h3>
+      <table>
+        <thead><tr><th scope="col">Check</th><th scope="col">Tag</th><th scope="col">Expected</th><th scope="col">Result</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap">TC-01</td><td>retest</td><td>“Sign in using SSO” and “Sign in with Passkey” are displayed below “Sign in with Google”, in the correct order.</td><td><span class="chip warn">BLOCKED</span></td></tr>
+          <tr><td class="nowrap">TC-02</td><td>regression</td><td>The user is authenticated and the dashboard is displayed, with “/dashboard” in the URL.</td><td><span class="chip warn">BLOCKED</span></td></tr>
+          <tr><td class="nowrap">TC-03</td><td>negative</td><td>The error “Invalid credentials” is displayed and the user stays on the login page.</td><td><span class="chip warn">BLOCKED</span></td></tr>
+          <tr><td class="nowrap">TC-04</td><td>negative</td><td>A fallback guidance message is shown and the user stays on the login page.</td><td><span class="chip warn">BLOCKED</span></td></tr>
+        </tbody>
+      </table>
+      <h3>Other comments</h3>
+      <table>
+        <thead><tr><th scope="col">Date</th><th scope="col">Author</th><th scope="col">Comment</th></tr></thead>
+        <tbody>
+          <tr><td class="nowrap">01 Jul 2026</td><td>Pramod</td><td>“not able to reproduce” (context unclear – G-02)</td></tr>
+          <tr><td class="nowrap">18 Oct 2026</td><td>Pramod</td><td>Bug triage: severity minor, priority P0. Names “XYZ module” as a risk. Plans functional and non-functional testing, applying manual techniques such as boundary values.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="defects">
+      <h2>11. Defect reporting procedure</h2>
+      <ul>
+        <li><strong>What counts as a defect:</strong> any deviation from the VWO-49 acceptance criteria or the answers to section 4; any UX or accessibility issue on the new options; any technical error in the SSO or passkey flows; any exposure of sensitive data.</li>
+        <li><strong>How to report:</strong> raise it in JIRA, linked to VWO-49, using the team template. Include environment and URL, browser/device and OS, identity provider or passkey authenticator used, steps to reproduce, expected vs actual result, and screenshots or a screen recording. Redact tokens and assertions from logs and HAR files.</li>
+        <li><strong>Triage:</strong> assign severity and priority, then route to the right owner. Any exposure of credentials or tokens (AC6), and any failure of a P0 sign-in path, is raised as critical or high. These block the Definition of Done.</li>
+        <li><strong>Owners (from the company defect process):</strong> Frontend POC for login-page UI and messages; Backend POC for SSO and WebAuthn authentication; DevOps POC for environment, identity-provider connectivity and deployment. Named owners for VWO-49 are <span class="chip warn">TBC</span>.</li>
+        <li><strong>Communication:</strong> end-of-day status email listing the defects found that day; defect status reviewed in stand-up.</li>
+        <li><strong>Metrics:</strong> defects found by severity, time to resolve, percentage fixed and retested, and pass rate of the P0 scenarios.</li>
+      </ul>
+    </section>
+
+    <section id="schedule">
+      <h2>12. Test schedule and resource allocation</h2>
+      <h3>Schedule</h3>
+      <table>
+        <thead><tr><th scope="col">Task</th><th scope="col">Dates</th></tr></thead>
+        <tbody>
+          <tr><td>Create test plan (this document)</td><td>19 Nov 2026 – draft</td></tr>
+          <tr><td>Author answers gap questions; plan approved</td><td><span class="chip warn">TBC</span></td></tr>
+          <tr><td>Test case creation</td><td><span class="chip warn">TBC</span> after plan approval</td></tr>
+          <tr><td>Fix blocked automation (TC-01 to TC-04)</td><td><span class="chip warn">TBC</span> can start now (G-18)</td></tr>
+          <tr><td>Test case execution</td><td><span class="chip warn">TBC</span> after the staging deploy</td></tr>
+          <tr><td>Summary report submission</td><td><span class="chip warn">TBC</span></td></tr>
+        </tbody>
+      </table>
+      <p>The company standard allows <strong>2 sprints</strong> to test an application. VWO-49 has no sprint, estimate or fix version yet, so calendar dates are set once the ticket is scheduled (G-19).</p>
+      <h3>Resource allocation</h3>
+      <table>
+        <thead><tr><th scope="col">Role</th><th scope="col">Responsibility</th><th scope="col">Owner</th></tr></thead>
+        <tbody>
+          <tr><td>QA owner / test lead</td><td>Approves the plan, tracks progress, gives QA sign-off</td><td><span class="chip warn">TBC</span></td></tr>
+          <tr><td>Manual QA</td><td>Writes and runs test cases across the browser/device matrix</td><td><span class="chip warn">TBC</span></td></tr>
+          <tr><td>Automation engineer</td><td>Fixes the blocked n8n + Playwright run and extends it to the P0 scenarios</td><td><span class="chip warn">TBC</span></td></tr>
+          <tr><td>Reporter / product</td><td>Answers questions G-01 to G-19</td><td>Pramod (reporter)</td></tr>
+          <tr><td>Frontend, Backend, DevOps POCs</td><td>Fix defects; provide the staging environment</td><td>Per company defect process</td></tr>
+          <tr><td>Identity-provider admin</td><td>Supplies a test account for each identity provider</td><td><span class="chip warn">TBC</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="deliverables">
+      <h2>13. Test deliverables</h2>
+      <ul>
+        <li>Test plan (this document)</li>
+        <li>Answered gap and question log (section 4)</li>
+        <li>Test scenarios and test cases</li>
+        <li>Automation scripts and run reports (n8n + Playwright)</li>
+        <li>Defect reports in JIRA, linked to VWO-49</li>
+        <li>Daily status emails</li>
+        <li>Test execution report and test summary report</li>
+        <li>QA sign-off recorded on VWO-49</li>
+      </ul>
+    </section>
+
+    <section id="criteria">
+      <h2>14. Entry and exit criteria</h2>
+      <table>
+        <thead><tr><th scope="col">Phase</th><th scope="col">Entry criteria</th><th scope="col">Exit criteria</th></tr></thead>
+        <tbody>
+          <tr><td>Requirement analysis</td><td>The testing team has received VWO-49 (done)</td><td>The requirements have been reviewed and understood · the blocking questions are answered (see Human review gate)</td></tr>
+          <tr><td>Test execution</td><td>Test scenarios and test cases signed off · feature deployed to staging · a test account ready for each identity provider · passkey-registered accounts ready · smoke test passes</td><td>All planned scenarios executed · test case reports and defect reports ready</td></tr>
+          <tr><td>Test closure</td><td>Test case reports and defect reports ready</td><td>Test summary report delivered · Definition of Done met: all acceptance criteria met, QA sign-off completed, no critical or high defects open, documentation updated</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Suspension:</strong> testing is suspended and the build rejected if the smoke test fails. While automation stays blocked, the P0 scenarios are run manually.</p>
+    </section>
+
+    <section id="tools">
+      <h2>15. Tools</h2>
+      <ul>
+        <li>JIRA – bug tracking and the VWO-49 ticket</li>
+        <li>n8n + Playwright MCP – the existing automated test runs</li>
+        <li>Browser developer tools – network and console inspection (AC6)</li>
+        <li>Mind-map tool – scenario design</li>
+        <li>Snipping / screenshot tool – evidence</li>
+        <li>Word and Excel – test cases and reports</li>
+      </ul>
+    </section>
+
+    <section id="risks">
+      <h2>16. Risks, assumptions and mitigations</h2>
+      <table>
+        <thead><tr><th scope="col">Risk</th><th scope="col">Mitigation</th></tr></thead>
+        <tbody>
+          <tr><td>All 6 automated runs are blocked, so there is no automated evidence yet</td><td>Find the root cause before relying on automation (G-18); run the P0 scenarios manually meanwhile</td></tr>
+          <tr><td>The feature may not be deployed, or the target environment is unclear (production URLs used, staging required)</td><td>Confirm the staging URL, feature flag and deploy status before execution (G-02, G-03)</td></tr>
+          <tr><td>Passkey login depends on the separate passkey registration story</td><td>Confirm that story is done; set up passkey-registered test accounts in advance (G-15)</td></tr>
+          <tr><td>No test account for some identity providers</td><td>Request accounts from the identity-provider admins as soon as the plan is approved (G-09)</td></tr>
+          <tr><td>The passkey support matrix is undefined, so compatibility results can’t be judged</td><td>The product team publishes the support matrix before compatibility testing starts (G-08)</td></tr>
+          <tr><td>The priority conflict (Medium / High / P0) affects scheduling and triage</td><td>The author confirms a single priority (G-01)</td></tr>
+          <tr><td>An unidentified “XYZ module” is named as a risk in triage</td><td>Clarify which module it is and add focused tests (G-17)</td></tr>
+          <tr><td>Testing against production could affect real accounts</td><td>Use dedicated test accounts only; no real customer data</td></tr>
+          <tr><td>A resource is not available</td><td>Plan a backup resource</td></tr>
+          <tr><td>The build URL is not working</td><td>Testers work on other tasks (test case writing, automation fixes)</td></tr>
+          <tr><td>Less time for testing</td><td>Add resources as needed</td></tr>
+        </tbody>
+      </table>
+      <h3>Assumptions made in this plan</h3>
+      <ul>
+        <li>Email/password and “Sign in with Google” stay available and must not regress (“alongside existing authentication methods”).</li>
+        <li>Staging is the primary test environment, as the Definition of Done states.</li>
+        <li>The dashboard is the landing page after both SSO and passkey sign-in (AC2, AC3).</li>
+        <li>The company-standard browser/device matrix applies until the product team provides the passkey support list.</li>
+        <li>Passkeys can be registered through the separate registration story to create test data.</li>
+      </ul>
+    </section>
+
+    <section id="approvals">
+      <h2>17. Approvals</h2>
+      <p>The team will send the following documents for approval:</p>
+      <ul>
+        <li>Test plan</li>
+        <li>Test scenarios</li>
+        <li>Test cases</li>
+        <li>Reports</li>
+      </ul>
+      <p>Testing moves to the next step only after each approval.</p>
+      <table>
+        <thead><tr><th scope="col">Role</th><th scope="col">Name</th><th scope="col">Decision</th><th scope="col">Date</th></tr></thead>
+        <tbody>
+          <tr><td>QA owner</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>Product / reporter</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          <tr><td>Engineering lead</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gate" class="gate">
+      <h2>Human review gate</h2>
+      <h3>I assumed</h3>
+      <ul>
+        <li>Existing sign-in methods must keep working.</li>
+        <li>Staging is the test environment.</li>
+        <li>Both flows land on the dashboard.</li>
+        <li>The company browser/device matrix applies.</li>
+        <li>Passkey-registered test accounts can be created.</li>
+      </ul>
+      <h3>I could not confirm</h3>
+      <ul>
+        <li>Whether the feature is deployed, and where</li>
+        <li>The staging URL and feature flag</li>
+        <li>The list of identity providers and their protocols</li>
+        <li>The passkey support matrix</li>
+        <li>The exact error and fallback wording</li>
+        <li>Why every automated run is blocked</li>
+        <li>Which priority applies</li>
+      </ul>
+      <h3>Open questions blocking sign-off</h3>
+      <ul>
+        <li>G-02 / G-03: deploy status and environment</li>
+        <li>G-06 / G-07: message wording</li>
+        <li>G-08: passkey support matrix</li>
+        <li>G-09: identity providers and their test accounts</li>
+        <li>G-15: passkey registration dependency</li>
+      </ul>
+      <div class="callout"><strong>Approve this plan, or edit it, before test cases and automation are written.</strong></div>
+    </section>
+
+    <footer class="footer">
+      VWO-49 Test Plan · Version 1.0 (Draft) · Prepared 19 Nov 2026 from the VWO-49 Jira export and the company test-plan template
+    </footer>
+  </main>
+</body>
+</html>
