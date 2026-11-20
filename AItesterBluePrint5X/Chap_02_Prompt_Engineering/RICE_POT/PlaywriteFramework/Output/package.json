@@ -1,0 +1,24 @@
+{
+  "name": "vwo-login-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright + TypeScript login automation for VWO (app.wingify.com/#/login)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "typecheck": "tsc --noEmit",
+    "report": "allure generate allure-results --output allure-report --clean --open"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "26.6.6",
+    "allure": "3.33.0",
+    "allure-js-commons": "3.15.0",
+    "allure-playwright": "3.15.0",
+    "dotenv": "18.0.10",
+    "typescript": "6.0.3"
+  }
+}
