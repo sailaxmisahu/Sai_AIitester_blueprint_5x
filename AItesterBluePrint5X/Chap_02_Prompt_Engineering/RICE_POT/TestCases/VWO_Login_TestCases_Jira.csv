@@ -1,0 +1,123 @@
+"Test Case ID","Summary","Issue Type","Priority","Component/s","Labels","Test Type","Requirement Reference","Description","Preconditions","Test Steps","Test Data","Expected Result","Evidence Source","Verification Status","Automation Candidate","Automation Reference","Environment"
+"VWO-LOGIN-TC-001","Verify the login page loads over HTTPS with all login controls and correct default states","Test","High","Login","smoke","Positive","PRD > Current State Analysis > Existing Features (Standard Authentication Fields; Remember Me Functionality; Account Registration Link)
+PRD > User Experience Features > Interface Design > Auto-focus
+PRD > Technical Requirements > Data Protection > HTTPS Enforcement","Confirms that a user who opens app.vwo.com reaches the secure login page, that every login control is present, that the cursor starts in the Email address field, and that the password stays masked until the user reveals it.","1. A new Chrome Incognito window is open (no VWO session or cookies).
+2. The tester has internet access to app.vwo.com.","1. Type http://app.vwo.com/ in the address bar and press Enter.
+2. Check the browser tab title.
+3. Without clicking anything, check which field has the blinking cursor.
+4. Check the controls displayed on the login form.
+5. Check the ""Remember me"" checkbox and check the page for any error message.
+6. Click in the ""Password"" field and type the test password. Do not submit.
+7. Click the eye icon (Toggle password visibility) next to the Password field.
+8. Click the eye icon again.","URL: http://app.vwo.com/
+Password (typed only, never submitted): Sample#Pass123","Step 1: The browser is redirected to https://app.vwo.com/#/login.
+Step 2: The tab title is ""Login - Wingify"".
+Step 3: The cursor is in the ""Email address"" field.
+Step 4: The form shows the ""Email address"" field, the ""Password"" field, ""Forgot Password?"", the ""Remember me"" checkbox, ""Sign in"", ""Sign in with Google"", ""Sign in using SSO"", ""Sign in with Passkey"" and the ""Start a free trial"" link.
+Step 5: ""Remember me"" is unchecked and no error message is displayed.
+Step 6: The typed characters are masked.
+Step 7: The password is shown as readable text.
+Step 8: The password is masked again.","OBS-01, OBS-02, OBS-03, OBS-05 (live page, app.vwo.com, 24-Nov-2026). Step 8 also covered by automated TC_V03 (app.wingify.com, 20-Nov-2026).","Verified on the live page. ""Sign in with Passkey"" and the eye icon are on the page but not in the PRD (GAP-25, GAP-26).","Yes","Partly automated: PlaywriteFramework/Output/tests/valid-login.spec.ts (TC_V01, TC_V02, TC_V03)","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-002","Verify successful login with a valid registered email and password","Test","Highest","Login","valid-login","Positive","PRD > Functional Requirements > Authentication System > Login Process > Primary Authentication
+PRD > Integration Requirements > Platform Integrations > VWO Core Platform
+PRD > User Journey and Flow > Error Recovery Flow > Success Confirmation","Confirms that a registered user can sign in with email and password and is taken from the login page to the VWO dashboard.","1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.
+2. Two-factor authentication is turned off for this account (the PRD describes 2FA as optional).
+3. A new Chrome Incognito window shows https://app.vwo.com/#/login.","1. Type the registered email in the ""Email address"" field.
+2. Type the matching password in the ""Password"" field.
+3. Leave ""Remember me"" unchecked.
+4. Click ""Sign in"".
+5. Check the page that opens.","Email: <VALID_USERNAME> (registered test account, from the vault)
+Password: <VALID_PASSWORD> (from the vault)","Step 2: The password is masked.
+Step 4: No error message is displayed; ""Your email, password, IP address or location did not match"" does not appear.
+Step 5: The login form is no longer displayed and the user is taken to the VWO dashboard (PRD: seamless transition to the main dashboard). Dashboard URL and the element that confirms the landing page: Insufficient information to determine.","PRD (Primary Authentication; VWO Core Platform; Success Confirmation). Login controls: OBS-02.","Not executed: no registered test account was provided (GAP-01). The dashboard check is partial (GAP-02).","Yes","Automated: PlaywriteFramework/Output/tests/valid-login.spec.ts TC_V07 (skipped until VALID_USERNAME and VALID_PASSWORD are set in .env)","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-003","Verify successful login with ""Remember me"" selected and the form submitted with the Enter key","Test","High","Login","valid-login","Positive","PRD > Current State Analysis > Existing Features > Remember Me Functionality
+PRD > User Experience Features > Interface Design > Clickable Labels
+PRD > Accessibility Features > Keyboard Navigation
+PRD > User Journey and Flow > Returning User Experience > Quick Access","Confirms that a returning user can tick ""Remember me"" by clicking its label and can sign in from the keyboard by pressing Enter.","1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.
+2. Two-factor authentication is turned off for this account (the PRD describes 2FA as optional).
+3. A new Chrome Incognito window shows https://app.vwo.com/#/login.","1. Click the text ""Remember me"" (the label, not the box).
+2. Type the registered email in the ""Email address"" field.
+3. Type the matching password in the ""Password"" field.
+4. With the cursor still in the Password field, press Enter. Do not click ""Sign in"".
+5. Check the page that opens.","Email: <VALID_USERNAME> (registered test account, from the vault)
+Password: <VALID_PASSWORD> (from the vault)","Step 1: The ""Remember me"" checkbox becomes checked.
+Step 3: The password is masked.
+Step 4: The form is submitted without clicking ""Sign in"", and no error message is displayed.
+Step 5: The login form is no longer displayed and the user is taken to the VWO dashboard. Dashboard URL and the element that confirms the landing page: Insufficient information to determine.","OBS-04 (label click toggles the checkbox, app.vwo.com, 24-Nov-2026). OBS-08 (Enter submits the form, app.wingify.com, 24-Nov-2026). PRD sections listed.","Step 1 and the Enter-key submission in step 4 verified with synthetic data. The sign-in result (steps 4-5) not executed: needs a registered account (GAP-01). What ""Remember me"" keeps after the browser is closed, and for how long: Insufficient information to determine. (GAP-12), so it is not tested here.","Yes","Partly automated: PlaywriteFramework/Output/tests/valid-login.spec.ts TC_V04 (label toggle)","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-004","Verify login is rejected when both Email address and Password are empty","Test","High","Login","empty-fields","Negative","PRD > Functional Requirements > User Input Validation > Error Handling
+PRD > User Journey and Flow > Error Recovery Flow > Error Identification","Confirms that submitting an empty form is rejected with an error message and the user stays on the login page.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. No user is signed in.","1. Leave the ""Email address"" field empty.
+2. Leave the ""Password"" field empty.
+3. Click ""Sign in"".
+4. Check the message displayed and the address bar.","Email: (leave empty)
+Password: (leave empty)","Step 3: The user is not signed in.
+Step 4: The message ""Your email, password, IP address or location did not match"" is displayed, the login form is still shown, and the URL remains https://app.vwo.com/#/login.","OBS-06 (app.vwo.com, 24-Nov-2026; automated TC_I01 on app.wingify.com, 20-Nov-2026)","Verified on the live page. The PRD asks for ""clear, actionable"" error messages, but the page shows the same message for every failure (GAP-05). Confirm with the Product Owner that this is intended.","Yes","Automated: PlaywriteFramework/Output/tests/invalid-login.spec.ts TC_I01","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-005","Verify login is rejected when Email address is empty and a password is entered","Test","High","Login","empty-fields","Negative","PRD > Functional Requirements > User Input Validation > Error Handling
+PRD > User Journey and Flow > Error Recovery Flow > Error Identification","Confirms that a password alone cannot be used to sign in.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. No user is signed in.","1. Leave the ""Email address"" field empty.
+2. Type the test password in the ""Password"" field.
+3. Click ""Sign in"".
+4. Check the message displayed, the address bar and the Password field.","Email: (leave empty)
+Password: Wrong#Pass2026","Step 2: The password is masked.
+Step 3: The user is not signed in.
+Step 4: The message ""Your email, password, IP address or location did not match"" is displayed, the URL remains https://app.vwo.com/#/login and the Password field is cleared.","OBS-06, OBS-07 (app.wingify.com, 24-Nov-2026). Same application as app.vwo.com (OBS-01).","Verified on the live page (app.wingify.com).","Yes","Candidate: add as a data row to INVALID_LOGIN_CASES in PlaywriteFramework/Output/tests/invalid-login.spec.ts","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-006","Verify login is rejected when a valid-format email is entered and Password is empty","Test","High","Login","empty-fields","Negative","PRD > Functional Requirements > User Input Validation > Error Handling
+PRD > User Journey and Flow > Error Recovery Flow > Error Identification","Confirms that an email alone cannot be used to sign in.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. No user is signed in.","1. Type the test email in the ""Email address"" field.
+2. Leave the ""Password"" field empty.
+3. Click ""Sign in"".
+4. Check the message displayed and the address bar.","Email: qa.unregistered.user@example.com
+Password: (leave empty)","Step 3: The user is not signed in.
+Step 4: The message ""Your email, password, IP address or location did not match"" is displayed and the URL remains https://app.vwo.com/#/login.","OBS-06 (automated TC_I03 on app.wingify.com, 20-Nov-2026). Same application as app.vwo.com (OBS-01).","Verified on the live page (app.wingify.com, automated run).","Yes","Automated: PlaywriteFramework/Output/tests/invalid-login.spec.ts TC_I03","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-007","Verify invalid email formats are rejected (missing @, missing domain, missing local part, double @, embedded space)","Test","High","Login","email-validation","Negative","PRD > Functional Requirements > User Input Validation > Email Format Verification
+PRD > Functional Requirements > User Input Validation > Real-time Validation
+PRD > Functional Requirements > User Input Validation > Error Handling","Confirms that malformed email addresses cannot be used to sign in, and checks the on-blur email validation that the PRD requires.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. Run steps 1-7 once for each email in Test Data, in the order listed.","1. Type the email from the current data row in the ""Email address"" field.
+2. Press Tab to move the cursor to the Password field.
+3. Check the Email address field for a validation message.
+4. Type the test password in the ""Password"" field.
+5. Click ""Sign in"".
+6. Check the message displayed and the address bar.
+7. Open https://app.vwo.com/#/login again before the next data row.","Row 1 (missing @): jane.doe.example.com
+Row 2 (missing domain): jane.doe@
+Row 3 (missing local part): @example.com
+Row 4 (double @): jane.doe@@example.com
+Row 5 (embedded space): jane doe@example.com
+Password for every row: Wrong#Pass2026","Step 3: Per the PRD (Real-time Validation on blur; Email Format Verification), an email-format message is shown for the field. Exact message text: Insufficient information to determine. Observed on 24-Nov-2026: no message is shown. Log this as a PRD deviation (GAP-03, GAP-04).
+Step 5: The user is not signed in.
+Step 6: The message ""Your email, password, IP address or location did not match"" is displayed and the URL remains https://app.vwo.com/#/login.","OBS-06 (all 5 rows on app.wingify.com, 24-Nov-2026; row 1 also on app.vwo.com, 24-Nov-2026). OBS-09 (no on-blur message, app.wingify.com, 24-Nov-2026).","Steps 5-6 verified for all 5 rows. Step 3 does not meet the PRD on the live page (GAP-03, GAP-04): raise this with the Product Owner before marking pass or fail.","Yes","Partly automated: PlaywriteFramework/Output/tests/invalid-login.spec.ts TC_I02 covers ""not-an-email""; add the 5 rows as data.","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-008","Verify error handling when an unregistered email and an incorrect password are submitted","Test","Highest","Login","error-handling","Negative","PRD > Functional Requirements > User Input Validation > Error Handling
+PRD > User Journey and Flow > Error Recovery Flow > Error Identification","Confirms that an unknown account is rejected with an error message, that the user stays on the login page, and how the fields are left for the next attempt.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. The test email is not registered with VWO (it uses the reserved example.com domain).","1. Type the test email in the ""Email address"" field.
+2. Type the test password in the ""Password"" field.
+3. Click ""Sign in"".
+4. Check the message displayed and the address bar.
+5. Check the contents of the Email address and Password fields.","Email: qa.unregistered.user@example.com
+Password: Wrong#Pass2026","Step 3: The user is not signed in.
+Step 4: The message ""Your email, password, IP address or location did not match"" is displayed and the URL remains https://app.vwo.com/#/login.
+Step 5: The Email address field still contains qa.unregistered.user@example.com and the Password field is empty.","OBS-06, OBS-07 (app.vwo.com and app.wingify.com, 24-Nov-2026). Automated TC_I04 (app.wingify.com, 20-Nov-2026).","Verified on the live page.","Yes","Automated: PlaywriteFramework/Output/tests/invalid-login.spec.ts TC_I04 (the step 5 field checks are a candidate addition)","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-009","Verify login is rejected for a registered email with an incorrect password","Test","Highest","Login","error-handling","Negative","PRD > Functional Requirements > User Input Validation > Error Handling
+PRD > User Journey and Flow > Error Recovery Flow > Error Identification
+PRD > Technical Requirements > Compliance Standards > Rate Limiting","Confirms that a wrong password for a real account is rejected and the user stays on the login page.","1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.
+2. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+3. Run this test once per session. The PRD mentions request throttling but gives no lockout threshold (GAP-11), so keep attempts on the shared test account to a minimum.","1. Type the registered email in the ""Email address"" field.
+2. Type the incorrect password in the ""Password"" field.
+3. Click ""Sign in"".
+4. Check the message displayed and the address bar.","Email: <VALID_USERNAME> (registered test account, from the vault)
+Password: Wrong#Pass2026","Step 3: The user is not signed in.
+Step 4: An error message is displayed (PRD: Error Handling) and the URL remains https://app.vwo.com/#/login. Expected message text: Inference (low confidence): ""Your email, password, IP address or location did not match"", the message shown for every other failed sign-in; not yet observed for a registered account.","PRD (Error Handling; Rate Limiting). OBS-06 is the basis for the inferred message text.","Not executed: needs a registered account (GAP-01). The message text is an inference (GAP-10).","Yes","Candidate: add to PlaywriteFramework/Output/tests/invalid-login.spec.ts once credentials are available in .env","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"
+"VWO-LOGIN-TC-010","Verify Forgot Password error handling for empty, malformed and unregistered email addresses","Test","High","Login","error-handling","Negative","PRD > Functional Requirements > Password Management > Forgot Password Flow
+PRD > Functional Requirements > Password Management > Password Recovery
+PRD > User Journey and Flow > Error Recovery Flow > Recovery Options","Confirms that ""Forgot Password?"" opens the reset form, that ""Back"" returns to the login form, and how the reset form responds to bad input.","1. A new Chrome Incognito window shows https://app.vwo.com/#/login.
+2. Run steps 4-6 once for each email in Test Data, in the order listed.","1. Click ""Forgot Password?"" and check the form that opens.
+2. Click ""Back"".
+3. Check the form that is displayed.
+4. Open https://app.vwo.com/#/login again, then click ""Forgot Password?"".
+5. Type the email from the current data row in the ""Email address"" field (leave it empty for row 1), then click ""Reset Password"".
+6. Check the messages displayed and the address bar.","Row 1 (empty): (leave empty)
+Row 2 (malformed): jane.doe.example.com
+Row 3 (unregistered): qa.unregistered.user@example.com","Step 1: A reset form shows an ""Email address"" field with the cursor in it, a ""Back"" button and a ""Reset Password"" button.
+Step 3: The login form is displayed again.
+Step 6, row 1: The message ""Incorrect user input"" is displayed.
+Step 6, row 2: The text ""Invalid email"" appears with the Email address field, and the message ""If you are registered with us, you will receive a reset email from hello@wingify.com. If you don't see it in your inbox, please check your Spam folder."" is displayed.
+Step 6, row 3: The message ""If you are registered with us, you will receive a reset email from hello@wingify.com. If you don't see it in your inbox, please check your Spam folder."" is displayed and the URL is https://app.vwo.com/#/forgot-password.","OBS-10 (rows 1-2 on app.wingify.com; row 3 on app.vwo.com and app.wingify.com; 24-Nov-2026). Open and Back: automated TC_V05 (20-Nov-2026) and live check (24-Nov-2026).","Verified on the live page. Row 2 shows both ""Invalid email"" and the reset-email message; which response is intended: Insufficient information to determine. (GAP-16). Delivery of the reset email to a registered mailbox is not covered (GAP-01, GAP-16).","Yes","Partly automated: PlaywriteFramework/Output/tests/valid-login.spec.ts TC_V05 covers open and Back; add the rows as data.","Production: https://app.vwo.com/#/login | Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger"

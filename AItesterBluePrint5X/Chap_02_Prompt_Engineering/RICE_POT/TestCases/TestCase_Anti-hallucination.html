@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestCase Anti-hallucination</title>
+<meta name="description" content="VWO login functional test cases (Jira CSV) verified with the RICE-POT method and anti-hallucination rules.">
+<style>
+:root {
+  --bg: #f4f6f9; --paper: #ffffff; --fg: #1c2330; --muted: #5a6474; --line: #dbe1ea; --soft: #f3f5f9;
+  --accent: #2f5bd3; --accent-soft: #e9eefc;
+  --ok: #17703a; --ok-bg: #e2f5e8; --warn: #8a5a00; --warn-bg: #fff2c7;
+  --blocked: #b42318; --blocked-bg: #fde7e5; --partial: #0b5cb8; --partial-bg: #e1eeff;
+  --pos: #17703a; --pos-bg: #e2f5e8; --neg: #a33a12; --neg-bg: #fdeadf;
+  --unk-bg: #ffe6a8; --unk-fg: #5f3d00; --inf-bg: #e9dcff; --inf-fg: #45247f;
+  --code-bg: #eef1f6; --ui: #24324d;
+}
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1117; --paper: #161b23; --fg: #e4e8ef; --muted: #9aa4b3; --line: #2a313c; --soft: #1c222c;
+    --accent: #85a6ff; --accent-soft: #1d2741;
+    --ok: #74d991; --ok-bg: #15301f; --warn: #f2c56b; --warn-bg: #362a0e;
+    --blocked: #ff8f84; --blocked-bg: #3a1916; --partial: #7cb7ff; --partial-bg: #122a47;
+    --pos: #74d991; --pos-bg: #15301f; --neg: #ffab85; --neg-bg: #3a2014;
+    --unk-bg: #4a3910; --unk-fg: #ffd98c; --inf-bg: #33254d; --inf-fg: #d9c6ff;
+    --code-bg: #222a35; --ui: #c9d6f2;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.55 "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; }
+.page { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font: 0.86em/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3, h4 { line-height: 1.25; margin: 0; }
+p { margin: 0 0 10px; }
+
+.cover { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 28px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.cover h1 { font-size: 28px; margin: 6px 0 4px; }
+.cover .sub { color: var(--muted); margin: 0 0 18px; }
+.facts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 24px; margin-bottom: 20px; font-size: 13px; }
+.facts-row div span { display: block; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 4px 0 22px; }
+.stat { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stat b { display: block; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 12.5px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; padding: 0; list-style: none; counter-reset: toc; }
+.toc a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; color: var(--fg); background: var(--paper); }
+.toc a b { color: var(--accent); margin-right: 4px; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 20px; font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 14px; margin-top: 18px; }
+.legend div { display: flex; gap: 8px; align-items: baseline; }
+
+h2.sec { font-size: 21px; margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--line); display: flex; gap: 10px; align-items: baseline; }
+h2.sec .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+.sec-body h3 { font-size: 15.5px; margin: 22px 0 8px; }
+.sec-body > p, .sec-body > ul, .sec-body > ol { max-width: 900px; }
+ul.md, ol.md { margin: 0 0 12px; padding-left: 22px; }
+ul.md li, ol.md li { margin: 2px 0; }
+
+.tbl { overflow-x: auto; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; }
+table.data th, table.data td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+table.data thead th { background: var(--soft); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+table.data tbody tr:last-child td { border-bottom: 0; }
+td.idc { white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+tr:target td { background: var(--accent-soft); }
+
+.chip { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap; }
+.chip.pos { color: var(--pos); background: var(--pos-bg); }
+.chip.neg { color: var(--neg); background: var(--neg-bg); }
+.chip.prio, .chip.lbl { color: var(--muted); background: var(--soft); border-color: var(--line); font-weight: 500; }
+.chip.st.ok { color: var(--ok); background: var(--ok-bg); }
+.chip.st.warn { color: var(--warn); background: var(--warn-bg); }
+.chip.st.blocked { color: var(--blocked); background: var(--blocked-bg); }
+.chip.st.partial { color: var(--partial); background: var(--partial-bg); }
+
+mark { padding: 0 4px; border-radius: 4px; font-weight: 600; }
+mark.unk { background: var(--unk-bg); color: var(--unk-fg); }
+mark.inf { background: var(--inf-bg); color: var(--inf-fg); }
+a.ref { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ui { color: var(--ui); font-weight: 600; }
+.muted { color: var(--muted); }
+.na { color: var(--muted); font-style: italic; }
+
+.tc { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 0 0 18px; }
+.tc:target { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tc-top { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 8px; }
+.tc-id { font: 700 13px ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--accent); margin-right: 4px; }
+.tc h3 { font-size: 17px; margin-bottom: 6px; }
+.tc .desc { color: var(--muted); margin-bottom: 14px; }
+.tc h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.grid2 section { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+ul.plain { list-style: none; margin: 0; padding: 0; }
+ul.plain li { margin: 3px 0; }
+.dl { font-weight: 600; }
+table.steps { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; border-collapse: separate; border-spacing: 0; margin-bottom: 14px; }
+table.steps col.c-n { width: 36px; }
+table.steps col.c-step { width: 42%; }
+table.steps th { background: var(--soft); font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+table.steps td { padding: 8px 10px; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+table.steps tr:last-child td { border-bottom: 0; }
+table.steps td.n { font-weight: 700; color: var(--accent); text-align: center; font-variant-numeric: tabular-nums; }
+table.steps td + td { border-left: 1px solid var(--line); }
+ul.rows { margin: 0; padding-left: 0; list-style: none; }
+ul.rows li { margin: 0 0 6px; }
+ul.rows li:last-child { margin: 0; }
+dl.meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin: 0; font-size: 13px; }
+dl.meta dt { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
+dl.meta dd { margin: 0; }
+
+footer.end { margin-top: 36px; color: var(--muted); font-size: 12px; text-align: center; }
+
+@media screen and (max-width: 720px) {
+  .page { padding: 20px 16px 48px; }
+  .cover { padding: 20px 16px; }
+  .cover h1 { font-size: 23px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .grid2, dl.meta { grid-template-columns: 1fr; }
+  .tc { padding: 16px 14px; }
+  table.steps, table.steps tbody, table.steps tr, table.steps td { display: block; width: 100%; }
+  table.steps thead, table.steps colgroup { display: none; }
+  table.steps tr { border-bottom: 1px solid var(--line); padding: 6px 0; }
+  table.steps td { border: 0 !important; padding: 3px 10px; }
+  table.steps td.n { text-align: left; }
+  table.steps td:nth-child(3)::before { content: "Expected: "; font-weight: 600; color: var(--muted); }
+}
+
+@page { size: A4; }
+@media print {
+  :root { --bg: #fff; }
+  body { background: #fff; font-size: 9.6pt; line-height: 1.45; }
+  .page { max-width: none; padding: 0; }
+  .cover { border: 0; padding: 0; }
+  .toc a, a { color: var(--accent); text-decoration: none; }
+  h2.sec { break-before: page; margin-top: 0; break-after: avoid; }
+  .sec-body h3 { break-after: avoid; }
+  .tbl { overflow: visible; border-radius: 6px; }
+  table.data tr, table.steps tr, .grid2, dl.meta { break-inside: avoid; }
+  table.data thead { display: table-header-group; }
+  .tc { break-before: page; break-inside: auto; padding: 14px 16px; margin-bottom: 0; }
+  .tc.first { break-before: auto; margin-top: 8px; }
+  .tc-head { break-after: avoid; }
+  .stats { grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  body { font-size: 8.8pt; line-height: 1.36; }
+  .cover h1 { font-size: 19pt; }
+  .cover .sub { margin-bottom: 10px; }
+  .facts-row { margin-bottom: 10px; font-size: 8.4pt; gap: 4px 18px; }
+  .stat { padding: 7px 10px; }
+  .stat b { font-size: 17pt; }
+  .stat span { font-size: 8pt; }
+  .toc { margin-bottom: 10px; }
+  .toc a { padding: 3px 10px; font-size: 8.4pt; }
+  .legend { margin-top: 10px; padding-top: 8px; font-size: 7.8pt; gap: 4px 16px; }
+  table.data th, table.data td { padding: 4px 7px; font-size: 8.4pt; }
+  table.data thead th { font-size: 7.6pt; }
+  h2.sec { font-size: 15pt; margin-bottom: 10px; }
+  .sec-body h3 { font-size: 11pt; margin: 14px 0 6px; }
+  .chip { font-size: 7.6pt; padding: 1px 7px; }
+  .tc-top { margin-bottom: 5px; }
+  .tc h3 { font-size: 12pt; margin-bottom: 4px; }
+  .tc .desc { margin-bottom: 8px; }
+  .tc h4 { font-size: 7.6pt; margin-bottom: 3px; }
+  .grid2 { gap: 8px; margin-bottom: 8px; }
+  .grid2 section { padding: 6px 9px; }
+  ul.plain li { margin: 1px 0; }
+  table.steps { margin-bottom: 8px; }
+  table.steps th { padding: 4px 7px; font-size: 7.6pt; }
+  table.steps td { padding: 4px 7px; font-size: 8.6pt; }
+  table.steps col.c-n { width: 26px; }
+  dl.meta { font-size: 8pt; gap: 5px 16px; }
+  dl.meta dt { font-size: 7.4pt; margin-bottom: 1px; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="cover">
+  <div class="eyebrow">RICE-POT method &middot; Anti-hallucination rules &middot; Jira-ready</div>
+  <h1>VWO Login: Functional Test Cases</h1>
+  <p class="sub">Ten manual test cases for the login page, each traced to the PRD or to an observation of the live page, with every unknown stated rather than guessed.</p>
+
+  <div class="facts-row">
+    <div><span>Application under test</span>https://app.vwo.com/#/login<br><span style="display:inline;text-transform:none;letter-spacing:0">also served at https://app.wingify.com/#/login</span></div>
+    <div><span>Execution environment</span>Desktop Google Chrome (latest stable) | Windows 11 | Window 1280x720 or larger</div>
+    <div><span>Verified on</span>24-Nov-2026</div>
+    <div><span>Source files</span><a href="VWO_Login_TestCases_Jira.csv">VWO_Login_TestCases_Jira.csv</a><br><a href="VWO_Login_TestCases_Validation.md">VWO_Login_TestCases_Validation.md</a></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>10</b><span>test cases &middot; 3 positive, 7 negative</span></div>
+    <div class="stat"><b>7</b><span>verified on the live page &middot; 3 need a registered account</span></div>
+    <div class="stat"><b>30</b><span>gaps found by the anti-hallucination rules</span></div>
+    <div class="stat"><b>2</b><span>candidate defects found while verifying</span></div>
+  </div>
+
+  <ul class="toc">
+    <li><a href="#verified-facts"><b>1</b>Verified Facts</a></li>
+    <li><a href="#missing-information"><b>2</b>Missing / Unknown Information</a></li>
+    <li><a href="#test-cases"><b>3</b>Generated Output: Test Cases</a></li>
+    <li><a href="#self-validation"><b>4</b>Self-Validation Check</a></li>
+  </ul>
+
+  <div class="tbl"><table class="data">
+    <thead><tr><th>Test case ID</th><th>Summary</th><th>Type</th><th>Priority</th><th>Status</th></tr></thead>
+    <tbody><tr><td class="idc"><a href="#VWO-LOGIN-TC-001">VWO-LOGIN-TC-001</a></td><td>Verify the login page loads over HTTPS with all login controls and correct default states</td><td><span class="chip pos">Positive</span></td><td>High</td><td><span class="chip st ok">Verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-002">VWO-LOGIN-TC-002</a></td><td>Verify successful login with a valid registered email and password</td><td><span class="chip pos">Positive</span></td><td>Highest</td><td><span class="chip st blocked">Not executed</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-003">VWO-LOGIN-TC-003</a></td><td>Verify successful login with &quot;Remember me&quot; selected and the form submitted with the Enter key</td><td><span class="chip pos">Positive</span></td><td>High</td><td><span class="chip st partial">Partly verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-004">VWO-LOGIN-TC-004</a></td><td>Verify login is rejected when both Email address and Password are empty</td><td><span class="chip neg">Negative</span></td><td>High</td><td><span class="chip st ok">Verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-005">VWO-LOGIN-TC-005</a></td><td>Verify login is rejected when Email address is empty and a password is entered</td><td><span class="chip neg">Negative</span></td><td>High</td><td><span class="chip st ok">Verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-006">VWO-LOGIN-TC-006</a></td><td>Verify login is rejected when a valid-format email is entered and Password is empty</td><td><span class="chip neg">Negative</span></td><td>High</td><td><span class="chip st ok">Verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-007">VWO-LOGIN-TC-007</a></td><td>Verify invalid email formats are rejected (missing @, missing domain, missing local part, double @, embedded space)</td><td><span class="chip neg">Negative</span></td><td>High</td><td><span class="chip st warn">Verified, PRD deviation</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-008">VWO-LOGIN-TC-008</a></td><td>Verify error handling when an unregistered email and an incorrect password are submitted</td><td><span class="chip neg">Negative</span></td><td>Highest</td><td><span class="chip st ok">Verified</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-009">VWO-LOGIN-TC-009</a></td><td>Verify login is rejected for a registered email with an incorrect password</td><td><span class="chip neg">Negative</span></td><td>Highest</td><td><span class="chip st blocked">Not executed</span></td></tr><tr><td class="idc"><a href="#VWO-LOGIN-TC-010">VWO-LOGIN-TC-010</a></td><td>Verify Forgot Password error handling for empty, malformed and unregistered email addresses</td><td><span class="chip neg">Negative</span></td><td>High</td><td><span class="chip st ok">Verified</span></td></tr></tbody>
+  </table></div>
+
+  <div class="legend">
+    <div><mark class="unk">Insufficient information to determine.</mark> The inputs do not define this; nothing was guessed (5 in the test cases).</div>
+    <div><mark class="inf">Inference (low confidence)</mark> Inferred, not observed (1 in the test cases).</div>
+    <div><a class="ref" href="#OBS-01">OBS-xx</a> / <a class="ref" href="#GAP-01">GAP-xx</a> / <a class="ref" href="#DEF-01">DEF-xx</a> Links to the observation, gap or defect behind a statement.</div>
+    <div><span class="ui">"Quoted text"</span> Exact on-screen wording, copied from the live page.</div>
+  </div>
+</header>
+
+<h2 class="sec" id="verified-facts"><span class="num">1</span> Verified Facts</h2>
+<div class="sec-body">
+<h3>Inputs used</h3><div class="tbl"><table class="data"><thead><tr><th>Input type (per rules)</th><th>Source</th></tr></thead><tbody><tr><td>PRD</td><td><code>PRD_VWO.doc</code>, <em>Product Requirements Document: VWO Login Dashboard</em></td></tr><tr><td>Logs</td><td>Live-page observation logs captured with Playwright Chromium against https://app.vwo.com/#/login and https://app.wingify.com/#/login on 24-Nov-2026, plus the automated suite run of 20-Nov-2026 (<code>PlaywriteFramework/Output</code>)</td></tr><tr><td>Test data</td><td>Synthetic data only. Emails use the reserved <code>example.com</code> domain, and passwords are invented strings. No real accounts.</td></tr></tbody></table></div>
+<h3>From the PRD</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>PRD section</th><th>Statement used</th></tr></thead><tbody><tr id="P-01"><td class="idc">P-01</td><td>Existing Features</td><td>Email address and password input fields; Remember Me checkbox; link to free-trial signup</td></tr><tr id="P-02"><td class="idc">P-02</td><td>Login Process</td><td>Email and password based login with secure validation; optional 2FA; enterprise SSO</td></tr><tr id="P-03"><td class="idc">P-03</td><td>User Input Validation</td><td>Field validation on blur; automatic email format validation; clear, actionable error messages</td></tr><tr id="P-04"><td class="idc">P-04</td><td>Password Management</td><td>Forgot Password flow; email-based reset</td></tr><tr id="P-05"><td class="idc">P-05</td><td>Interface Design</td><td>Auto-focus on the first input; clickable labels</td></tr><tr id="P-06"><td class="idc">P-06</td><td>Accessibility Features</td><td>Full keyboard accessibility for all interactive elements</td></tr><tr id="P-07"><td class="idc">P-07</td><td>Data Protection</td><td>HTTPS enforcement</td></tr><tr id="P-08"><td class="idc">P-08</td><td>Compliance Standards</td><td>Rate limiting through request throttling</td></tr><tr id="P-09"><td class="idc">P-09</td><td>Platform Integrations / Error Recovery Flow</td><td>Seamless transition to the main dashboard; clear indication of successful login</td></tr><tr id="P-10"><td class="idc">P-10</td><td>Returning User Experience</td><td>Remembered credentials option (Quick Access)</td></tr></tbody></table></div>
+<h3>From the live-page observation logs</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Host, date</th><th>Observation</th></tr></thead><tbody><tr id="OBS-01"><td class="idc">OBS-01</td><td>app.vwo.com, 24-Nov</td><td><code>http://app.vwo.com/</code> redirects to <code>https://app.vwo.com/#/login</code>. Tab title is &quot;Login - Wingify&quot;. app.wingify.com serves the same page (same title and element IDs), and <code>http://</code> also redirects to <code>https://</code> there.</td></tr><tr id="OBS-02"><td class="idc">OBS-02</td><td>app.vwo.com, 24-Nov</td><td>Visible controls: &quot;Email address&quot; (placeholder &quot;Enter email ID&quot;), &quot;Password&quot; (placeholder &quot;Enter password&quot;), eye icon &quot;Toggle password visibility&quot;, &quot;Forgot Password?&quot;, &quot;Remember me&quot;, &quot;Sign in&quot;, &quot;Sign in with Google&quot;, &quot;Sign in using SSO&quot;, &quot;Sign in with Passkey&quot;, &quot;Don't have an account? Start a free trial&quot;, and the text &quot;By continuing, you agree to Wingify's Privacy policy &amp; Terms.&quot;</td></tr><tr id="OBS-03"><td class="idc">OBS-03</td><td>both hosts, 24-Nov</td><td>The cursor is in the Email address field on load. &quot;Remember me&quot; is unchecked by default. No error message is shown on load.</td></tr><tr id="OBS-04"><td class="idc">OBS-04</td><td>app.vwo.com 24-Nov; app.wingify.com 20-Nov</td><td>Clicking the &quot;Remember me&quot; label toggles the checkbox.</td></tr><tr id="OBS-05"><td class="idc">OBS-05</td><td>app.vwo.com 24-Nov; app.wingify.com 20-Nov</td><td>The password field is masked. The eye icon switches it to plain text, and a second click masks it again.</td></tr><tr id="OBS-06"><td class="idc">OBS-06</td><td>see the list below</td><td>Every failed sign-in shows &quot;Your email, password, IP address or location did not match&quot; and the URL stays on <code>#/login</code>.</td></tr><tr id="OBS-07"><td class="idc">OBS-07</td><td>both hosts, 24-Nov</td><td>After a failed sign-in, the email value is kept and the password field is cleared. On app.wingify.com, the error also stayed visible while the user edited the email.</td></tr><tr id="OBS-08"><td class="idc">OBS-08</td><td>app.wingify.com, 24-Nov</td><td>Pressing Enter in the Password field submits the form.</td></tr><tr id="OBS-09"><td class="idc">OBS-09</td><td>app.wingify.com, 24-Nov</td><td>After a malformed email and Tab (blur), no field-level message appears. The form has <code>novalidate</code>, and the field has no <code>aria-invalid</code>.</td></tr><tr id="OBS-10"><td class="idc">OBS-10</td><td>24-Nov</td><td>&quot;Forgot Password?&quot; opens a form with &quot;Email address&quot; (focused), &quot;Back&quot; and &quot;Reset Password&quot;; Back returns to login. Results of Reset Password:<br>• Empty: &quot;Incorrect user input&quot;.<br>• <code>jane.doe.example.com</code>: &quot;Invalid email&quot; with the field, <strong>and</strong> the reset-email message.<br>• <code>qa.unregistered.user@example.com</code>: &quot;If you are registered with us, you will receive a reset email from hello@wingify.com. If you don't see it in your inbox, please check your Spam folder.&quot; (both hosts)</td></tr><tr id="OBS-11"><td class="idc">OBS-11</td><td>24-Nov</td><td>The link addresses for &quot;Start a free trial&quot; (app.vwo.com), &quot;Privacy policy&quot; and &quot;Terms&quot; (both hosts) contain an unfilled <code>{{$root.VWO_DOMAIN...}}</code> placeholder. Clicking &quot;Privacy policy&quot; on app.wingify.com opened a browser error page.</td></tr><tr id="OBS-12"><td class="idc">OBS-12</td><td>app.wingify.com, 24-Nov</td><td>Tab order from the email field: Password, eye icon, Forgot Password?, Sign in, Google, SSO, Passkey, free trial, Privacy policy, Terms. <strong>&quot;Remember me&quot; is skipped</strong>: the checkbox is <code>display:none</code> and its label is not focusable.</td></tr><tr id="OBS-13"><td class="idc">OBS-13</td><td>app.wingify.com, 24-Nov</td><td>&quot;Sign in using SSO&quot; opens <code>#/sso</code>. Empty email: &quot;Incorrect user input&quot;. An <code>example.com</code> email: &quot;Single Sign-On (SSO) is not enabled for your account. Enter the password to sign in.&quot;</td></tr><tr id="OBS-14"><td class="idc">OBS-14</td><td>app.wingify.com, 24-Nov</td><td>While a sign-in is processing, the Sign in button gets an <code>is-in-action</code> state for under 1 second; its text is unchanged. The error message container has no <code>aria-live</code> or <code>role</code>. No password-strength indicator and no Light/Dark Mode banner were found.</td></tr></tbody></table></div>
+<p><strong><a class="ref" href="#OBS-06">OBS-06</a> coverage.</strong> These failed sign-ins all showed the same message:</p>
+<ul class="md"><li>Both fields empty: app.vwo.com 24-Nov; app.wingify.com 20-Nov.</li><li>Empty email with a password: app.wingify.com 24-Nov.</li><li>Valid-format email with an empty password: app.wingify.com 20-Nov.</li><li>Five malformed emails: app.wingify.com 24-Nov. Row 1 was also tried on app.vwo.com.</li><li>Unregistered email with a wrong password: both hosts.</li></ul>
+</div>
+
+<h2 class="sec" id="missing-information"><span class="num">2</span> Missing / Unknown Information</h2>
+<div class="sec-body">
+<p><strong>Total: 30 gaps.</strong> In addition, there are <strong>2 candidate defects</strong>.</p>
+<div class="tbl"><table class="data"><thead><tr><th>Category</th><th>Count</th><th>Gap IDs</th></tr></thead><tbody><tr><td>Blocks execution</td><td>2</td><td><a class="ref" href="#GAP-01">GAP-01</a> to <a class="ref" href="#GAP-02">GAP-02</a></td></tr><tr><td>The PRD conflicts with the live page</td><td>7</td><td><a class="ref" href="#GAP-03">GAP-03</a> to <a class="ref" href="#GAP-09">GAP-09</a></td></tr><tr><td>Not specified anywhere (open questions)</td><td>15</td><td><a class="ref" href="#GAP-10">GAP-10</a> to <a class="ref" href="#GAP-24">GAP-24</a></td></tr><tr><td>On the page but missing from the PRD</td><td>3</td><td><a class="ref" href="#GAP-25">GAP-25</a> to <a class="ref" href="#GAP-27">GAP-27</a></td></tr><tr><td>PRD document quality</td><td>3</td><td><a class="ref" href="#GAP-28">GAP-28</a> to <a class="ref" href="#GAP-30">GAP-30</a></td></tr></tbody></table></div>
+<h3>Blocks execution</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Gap</th><th>Affects</th></tr></thead><tbody><tr id="GAP-01"><td class="idc">GAP-01</td><td>No registered VWO test account (email and password) was provided</td><td><a class="ref" href="#VWO-LOGIN-TC-002">TC-002</a>, <a class="ref" href="#VWO-LOGIN-TC-003">TC-003</a>, <a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a> (not executed)</td></tr><tr id="GAP-02"><td class="idc">GAP-02</td><td>The PRD does not specify the post-login landing page: no dashboard URL and no element that confirms a successful login</td><td><a class="ref" href="#VWO-LOGIN-TC-002">TC-002</a>, <a class="ref" href="#VWO-LOGIN-TC-003">TC-003</a></td></tr></tbody></table></div>
+<h3>The PRD conflicts with the live page</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>PRD says</th><th>Live page shows</th><th>Affects</th></tr></thead><tbody><tr id="GAP-03"><td class="idc">GAP-03</td><td>Real-time validation on blur</td><td>No field-level message on blur (<a class="ref" href="#OBS-09">OBS-09</a>)</td><td><a class="ref" href="#VWO-LOGIN-TC-007">TC-007</a></td></tr><tr id="GAP-04"><td class="idc">GAP-04</td><td>Automatic email format validation</td><td>Malformed emails are submitted and get the generic message (<a class="ref" href="#OBS-06">OBS-06</a>)</td><td><a class="ref" href="#VWO-LOGIN-TC-007">TC-007</a></td></tr><tr id="GAP-05"><td class="idc">GAP-05</td><td>&quot;Clear, actionable&quot; error messages</td><td>One generic message for every failure type (<a class="ref" href="#OBS-06">OBS-06</a>)</td><td><a class="ref" href="#VWO-LOGIN-TC-004">TC-004</a> to <a class="ref" href="#VWO-LOGIN-TC-008">TC-008</a></td></tr><tr id="GAP-06"><td class="idc">GAP-06</td><td>Social login with Google, Microsoft and others</td><td>Only Google, plus Passkey (<a class="ref" href="#OBS-02">OBS-02</a>)</td><td>(none of the 10)</td></tr><tr id="GAP-07"><td class="idc">GAP-07</td><td>A Light/Dark Mode announcement banner</td><td>Not found (<a class="ref" href="#OBS-14">OBS-14</a>)</td><td>(none of the 10)</td></tr><tr id="GAP-08"><td class="idc">GAP-08</td><td>VWO branding</td><td>Title and consent text say &quot;Wingify&quot; (<a class="ref" href="#OBS-01">OBS-01</a>, <a class="ref" href="#OBS-02">OBS-02</a>)</td><td><a class="ref" href="#VWO-LOGIN-TC-001">TC-001</a></td></tr><tr id="GAP-09"><td class="idc">GAP-09</td><td>Password strength indicators</td><td>None on the login form (<a class="ref" href="#OBS-14">OBS-14</a>)</td><td>(none of the 10)</td></tr></tbody></table></div>
+<h3>Not specified anywhere (marked &quot;<mark class="unk">Insufficient information to determine.</mark>&quot;)</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Unknown</th><th>Affects</th></tr></thead><tbody><tr id="GAP-10"><td class="idc">GAP-10</td><td>The error text for a registered email with a wrong password (an inference is used)</td><td><a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a></td></tr><tr id="GAP-11"><td class="idc">GAP-11</td><td>The rate-limit or lockout threshold, lock duration and message</td><td><a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a> (attempts limited)</td></tr><tr id="GAP-12"><td class="idc">GAP-12</td><td>What &quot;Remember me&quot; keeps and for how long. The PRD describes it both as &quot;persistent login sessions&quot; and as &quot;remembered credentials&quot;.</td><td><a class="ref" href="#VWO-LOGIN-TC-003">TC-003</a></td></tr><tr id="GAP-13"><td class="idc">GAP-13</td><td>Session timeout values (&quot;configurable timeout periods&quot;)</td><td>(none of the 10)</td></tr><tr id="GAP-14"><td class="idc">GAP-14</td><td>The 2FA flow: how it is enabled, OTP channel, OTP length and expiry, error texts</td><td>Preconditions of <a class="ref" href="#VWO-LOGIN-TC-002">TC-002</a>, <a class="ref" href="#VWO-LOGIN-TC-003">TC-003</a></td></tr><tr id="GAP-15"><td class="idc">GAP-15</td><td>The SSO flow after the email lookup, and the supported protocols per account</td><td>(none of the 10)</td></tr><tr id="GAP-16"><td class="idc">GAP-16</td><td>The intended Forgot Password responses (for example, whether a malformed email should show both messages), reset-token expiry and the content of the reset email</td><td><a class="ref" href="#VWO-LOGIN-TC-010">TC-010</a></td></tr><tr id="GAP-17"><td class="idc">GAP-17</td><td>Field rules: maximum length, whitespace trimming, whether the email is case-sensitive</td><td>(none of the 10)</td></tr><tr id="GAP-18"><td class="idc">GAP-18</td><td>Password complexity rules (no values given)</td><td>(none of the 10)</td></tr><tr id="GAP-19"><td class="idc">GAP-19</td><td>How the loading state should look (&quot;clear feedback&quot;)</td><td>(none of the 10)</td></tr><tr id="GAP-20"><td class="idc">GAP-20</td><td>Supported browser, OS and device matrix, and responsive breakpoints</td><td>Environment column</td></tr><tr id="GAP-21"><td class="idc">GAP-21</td><td>The definition of a &quot;standard connection&quot; and how to measure the 2-second load target</td><td>(none of the 10)</td></tr><tr id="GAP-22"><td class="idc">GAP-22</td><td>Accessibility details: how High Contrast Mode is turned on, and whether errors must be announced to screen readers. The error container has no <code>aria-live</code>, so screen readers may not announce it: <mark class="inf">Inference (low confidence)</mark>.</td><td>(none of the 10)</td></tr><tr id="GAP-23"><td class="idc">GAP-23</td><td>Only the production URL was given, so there is no safe environment for lockout, security or load tests</td><td><a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a></td></tr><tr id="GAP-24"><td class="idc">GAP-24</td><td>Which host is canonical. app.vwo.com and app.wingify.com serve the same app with small text differences.</td><td>Environment column</td></tr></tbody></table></div>
+<h3>On the page but missing from the PRD</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Item</th><th>Affects</th></tr></thead><tbody><tr id="GAP-25"><td class="idc">GAP-25</td><td>&quot;Sign in with Passkey&quot;: the PRD defines no scope or behaviour for it</td><td><a class="ref" href="#VWO-LOGIN-TC-001">TC-001</a> (presence only)</td></tr><tr id="GAP-26"><td class="idc">GAP-26</td><td>The password visibility eye icon</td><td><a class="ref" href="#VWO-LOGIN-TC-001">TC-001</a></td></tr><tr id="GAP-27"><td class="idc">GAP-27</td><td>The Privacy policy and Terms links and the consent text: their destinations are not specified</td><td><a class="ref" href="#DEF-01">DEF-01</a></td></tr></tbody></table></div>
+<h3>PRD document quality</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Issue</th></tr></thead><tbody><tr id="GAP-28"><td class="idc">GAP-28</td><td>There are no requirement IDs or acceptance criteria, so traceability can only use section names. There is also no version, owner or date.</td></tr><tr id="GAP-29"><td class="idc">GAP-29</td><td>Stray citation numbers are glued to sentences (for example &quot;secure validation56&quot; and &quot;immediate feedback7&quot;) with no reference list.</td></tr><tr id="GAP-30"><td class="idc">GAP-30</td><td>Several statements can't be measured, such as &quot;intuitive&quot;, &quot;professional, trustworthy appearance&quot; and &quot;90%+ user satisfaction&quot;.</td></tr></tbody></table></div>
+<h3>Candidate defects found during verification</h3>
+<div class="tbl"><table class="data"><thead><tr><th>ID</th><th>Severity (proposed)</th><th>Finding</th><th>Evidence</th></tr></thead><tbody><tr id="DEF-01"><td class="idc">DEF-01</td><td>High</td><td>On app.vwo.com, the &quot;Start a free trial&quot;, &quot;Privacy policy&quot; and &quot;Terms&quot; links point to addresses containing an unfilled <code>{{$root.VWO_DOMAIN...}}</code> placeholder. This breaks the PRD's free-trial registration link. On app.wingify.com, Privacy policy and Terms are broken the same way, and clicking Privacy policy opened a browser error page.</td><td><a class="ref" href="#OBS-11">OBS-11</a></td></tr><tr id="DEF-02"><td class="idc">DEF-02</td><td>Medium</td><td>Keyboard users cannot reach or toggle &quot;Remember me&quot;. This conflicts with PRD <em>Keyboard Navigation</em> and <em>WCAG 2.1 AA</em>.</td><td><a class="ref" href="#OBS-12">OBS-12</a></td></tr></tbody></table></div>
+</div>
+
+<h2 class="sec" id="test-cases"><span class="num">3</span> Generated Output: Test Cases</h2>
+<div class="sec-body">
+<p><a href="VWO_Login_TestCases_Jira.csv">VWO_Login_TestCases_Jira.csv</a> contains 10 test cases (3 positive, 7 negative) and 18 columns. The file is ASCII-only and RFC 4180 quoted, with multi-line cells.</p>
+
+<article class="tc first" id="VWO-LOGIN-TC-001">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-001</span>
+      <span class="chip pos">Positive</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">smoke</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify the login page loads over HTTPS with all login controls and correct default states</h3>
+    <p class="desc">Confirms that a user who opens app.vwo.com reaches the secure login page, that every login control is present, that the cursor starts in the Email address field, and that the password stays masked until the user reveals it.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window is open (no VWO session or cookies).</li><li>2. The tester has internet access to app.vwo.com.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">URL:</span> <code class="data">http://app.vwo.com/</code></li><li><span class="dl">Password (typed only, never submitted):</span> <code class="data">Sample#Pass123</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr><td class="n">1</td><td>Type http://app.vwo.com/ in the address bar and press Enter.</td><td>The browser is redirected to https://app.vwo.com/#/login.</td></tr><tr><td class="n">2</td><td>Check the browser tab title.</td><td>The tab title is <span class="ui">"Login - Wingify"</span>.</td></tr><tr><td class="n">3</td><td>Without clicking anything, check which field has the blinking cursor.</td><td>The cursor is in the <span class="ui">"Email address"</span> field.</td></tr><tr><td class="n">4</td><td>Check the controls displayed on the login form.</td><td>The form shows the <span class="ui">"Email address"</span> field, the <span class="ui">"Password"</span> field, <span class="ui">"Forgot Password?"</span>, the <span class="ui">"Remember me"</span> checkbox, <span class="ui">"Sign in"</span>, <span class="ui">"Sign in with Google"</span>, <span class="ui">"Sign in using SSO"</span>, <span class="ui">"Sign in with Passkey"</span> and the <span class="ui">"Start a free trial"</span> link.</td></tr><tr><td class="n">5</td><td>Check the <span class="ui">"Remember me"</span> checkbox and check the page for any error message.</td><td><span class="ui">"Remember me"</span> is unchecked and no error message is displayed.</td></tr><tr><td class="n">6</td><td>Click in the <span class="ui">"Password"</span> field and type the test password. Do not submit.</td><td>The typed characters are masked.</td></tr><tr><td class="n">7</td><td>Click the eye icon (Toggle password visibility) next to the Password field.</td><td>The password is shown as readable text.</td></tr><tr><td class="n">8</td><td>Click the eye icon again.</td><td>The password is masked again.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Current State Analysis &rsaquo; Existing Features (Standard Authentication Fields; Remember Me Functionality; Account Registration Link)</li><li>PRD &rsaquo; User Experience Features &rsaquo; Interface Design &rsaquo; Auto-focus</li><li>PRD &rsaquo; Technical Requirements &rsaquo; Data Protection &rsaquo; HTTPS Enforcement</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-01">OBS-01</a>, <a class="ref" href="#OBS-02">OBS-02</a>, <a class="ref" href="#OBS-03">OBS-03</a>, <a class="ref" href="#OBS-05">OBS-05</a> (live page, app.vwo.com, 24-Nov-2026). Step 8 also covered by automated TC_V03 (app.wingify.com, 20-Nov-2026).</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page. <span class="ui">"Sign in with Passkey"</span> and the eye icon are on the page but not in the PRD (<a class="ref" href="#GAP-25">GAP-25</a>, <a class="ref" href="#GAP-26">GAP-26</a>).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Partly automated: <code>PlaywriteFramework/Output/tests/valid-login.spec.ts</code> (TC_V01, TC_V02, TC_V03)</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-002">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-002</span>
+      <span class="chip pos">Positive</span>
+      <span class="chip prio">Priority: Highest</span>
+      <span class="chip lbl">valid-login</span>
+      <span class="chip st blocked">Not executed</span>
+    </div>
+    <h3>Verify successful login with a valid registered email and password</h3>
+    <p class="desc">Confirms that a registered user can sign in with email and password and is taken from the login page to the VWO dashboard.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.</li><li>2. Two-factor authentication is turned off for this account (the PRD describes 2FA as optional).</li><li>3. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <code>&lt;VALID_USERNAME&gt;</code> <span class="muted">(registered test account, from the vault)</span></li><li><span class="dl">Password:</span> <code>&lt;VALID_PASSWORD&gt;</code> <span class="muted">(from the vault)</span></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Type the registered email in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">2</td><td>Type the matching password in the <span class="ui">"Password"</span> field.</td><td>The password is masked.</td></tr><tr class="nocheck"><td class="n">3</td><td>Leave <span class="ui">"Remember me"</span> unchecked.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">4</td><td>Click <span class="ui">"Sign in"</span>.</td><td>No error message is displayed; <span class="ui">"Your email, password, IP address or location did not match"</span> does not appear.</td></tr><tr><td class="n">5</td><td>Check the page that opens.</td><td>The login form is no longer displayed and the user is taken to the VWO dashboard (PRD: seamless transition to the main dashboard). Dashboard URL and the element that confirms the landing page: <mark class="unk">Insufficient information to determine.</mark></td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; Authentication System &rsaquo; Login Process &rsaquo; Primary Authentication</li><li>PRD &rsaquo; Integration Requirements &rsaquo; Platform Integrations &rsaquo; VWO Core Platform</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Success Confirmation</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd>PRD (Primary Authentication; VWO Core Platform; Success Confirmation). Login controls: <a class="ref" href="#OBS-02">OBS-02</a>.</dd></div>
+    <div><dt>Verification status</dt><dd>Not executed: no registered test account was provided (<a class="ref" href="#GAP-01">GAP-01</a>). The dashboard check is partial (<a class="ref" href="#GAP-02">GAP-02</a>).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Automated: <code>PlaywriteFramework/Output/tests/valid-login.spec.ts</code> TC_V07 (skipped until <code>VALID_USERNAME</code> and <code>VALID_PASSWORD</code> are set in .env)</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-003">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-003</span>
+      <span class="chip pos">Positive</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">valid-login</span>
+      <span class="chip st partial">Partly verified</span>
+    </div>
+    <h3>Verify successful login with &quot;Remember me&quot; selected and the form submitted with the Enter key</h3>
+    <p class="desc">Confirms that a returning user can tick <span class="ui">"Remember me"</span> by clicking its label and can sign in from the keyboard by pressing Enter.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.</li><li>2. Two-factor authentication is turned off for this account (the PRD describes 2FA as optional).</li><li>3. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <code>&lt;VALID_USERNAME&gt;</code> <span class="muted">(registered test account, from the vault)</span></li><li><span class="dl">Password:</span> <code>&lt;VALID_PASSWORD&gt;</code> <span class="muted">(from the vault)</span></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr><td class="n">1</td><td>Click the text <span class="ui">"Remember me"</span> (the label, not the box).</td><td>The <span class="ui">"Remember me"</span> checkbox becomes checked.</td></tr><tr class="nocheck"><td class="n">2</td><td>Type the registered email in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Type the matching password in the <span class="ui">"Password"</span> field.</td><td>The password is masked.</td></tr><tr><td class="n">4</td><td>With the cursor still in the Password field, press Enter. Do not click <span class="ui">"Sign in"</span>.</td><td>The form is submitted without clicking <span class="ui">"Sign in"</span>, and no error message is displayed.</td></tr><tr><td class="n">5</td><td>Check the page that opens.</td><td>The login form is no longer displayed and the user is taken to the VWO dashboard. Dashboard URL and the element that confirms the landing page: <mark class="unk">Insufficient information to determine.</mark></td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Current State Analysis &rsaquo; Existing Features &rsaquo; Remember Me Functionality</li><li>PRD &rsaquo; User Experience Features &rsaquo; Interface Design &rsaquo; Clickable Labels</li><li>PRD &rsaquo; Accessibility Features &rsaquo; Keyboard Navigation</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Returning User Experience &rsaquo; Quick Access</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-04">OBS-04</a> (label click toggles the checkbox, app.vwo.com, 24-Nov-2026). <a class="ref" href="#OBS-08">OBS-08</a> (Enter submits the form, app.wingify.com, 24-Nov-2026). PRD sections listed.</dd></div>
+    <div><dt>Verification status</dt><dd>Step 1 and the Enter-key submission in step 4 verified with synthetic data. The sign-in result (steps 4-5) not executed: needs a registered account (<a class="ref" href="#GAP-01">GAP-01</a>). What <span class="ui">"Remember me"</span> keeps after the browser is closed, and for how long: <mark class="unk">Insufficient information to determine.</mark> (<a class="ref" href="#GAP-12">GAP-12</a>), so it is not tested here.</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Partly automated: <code>PlaywriteFramework/Output/tests/valid-login.spec.ts</code> TC_V04 (label toggle)</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-004">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-004</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">empty-fields</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify login is rejected when both Email address and Password are empty</h3>
+    <p class="desc">Confirms that submitting an empty form is rejected with an error message and the user stays on the login page.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. No user is signed in.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <span class="muted">(leave empty)</span></li><li><span class="dl">Password:</span> <span class="muted">(leave empty)</span></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Leave the <span class="ui">"Email address"</span> field empty.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">2</td><td>Leave the <span class="ui">"Password"</span> field empty.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">4</td><td>Check the message displayed and the address bar.</td><td>The message <span class="ui">"Your email, password, IP address or location did not match"</span> is displayed, the login form is still shown, and the URL remains https://app.vwo.com/#/login.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Error Identification</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-06">OBS-06</a> (app.vwo.com, 24-Nov-2026; automated TC_I01 on app.wingify.com, 20-Nov-2026)</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page. The PRD asks for <span class="ui">"clear, actionable"</span> error messages, but the page shows the same message for every failure (<a class="ref" href="#GAP-05">GAP-05</a>). Confirm with the Product Owner that this is intended.</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Automated: <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code> TC_I01</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-005">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-005</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">empty-fields</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify login is rejected when Email address is empty and a password is entered</h3>
+    <p class="desc">Confirms that a password alone cannot be used to sign in.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. No user is signed in.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <span class="muted">(leave empty)</span></li><li><span class="dl">Password:</span> <code class="data">Wrong#Pass2026</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Leave the <span class="ui">"Email address"</span> field empty.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">2</td><td>Type the test password in the <span class="ui">"Password"</span> field.</td><td>The password is masked.</td></tr><tr><td class="n">3</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">4</td><td>Check the message displayed, the address bar and the Password field.</td><td>The message <span class="ui">"Your email, password, IP address or location did not match"</span> is displayed, the URL remains https://app.vwo.com/#/login and the Password field is cleared.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Error Identification</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-06">OBS-06</a>, <a class="ref" href="#OBS-07">OBS-07</a> (app.wingify.com, 24-Nov-2026). Same application as app.vwo.com (<a class="ref" href="#OBS-01">OBS-01</a>).</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page (app.wingify.com).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Candidate: add as a data row to <code>INVALID_LOGIN_CASES</code> in <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code></dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-006">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-006</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">empty-fields</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify login is rejected when a valid-format email is entered and Password is empty</h3>
+    <p class="desc">Confirms that an email alone cannot be used to sign in.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. No user is signed in.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <code class="data">qa.unregistered.user@example.com</code></li><li><span class="dl">Password:</span> <span class="muted">(leave empty)</span></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Type the test email in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">2</td><td>Leave the <span class="ui">"Password"</span> field empty.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">4</td><td>Check the message displayed and the address bar.</td><td>The message <span class="ui">"Your email, password, IP address or location did not match"</span> is displayed and the URL remains https://app.vwo.com/#/login.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Error Identification</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-06">OBS-06</a> (automated TC_I03 on app.wingify.com, 20-Nov-2026). Same application as app.vwo.com (<a class="ref" href="#OBS-01">OBS-01</a>).</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page (app.wingify.com, automated run).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Automated: <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code> TC_I03</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-007">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-007</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">email-validation</span>
+      <span class="chip st warn">Verified, PRD deviation</span>
+    </div>
+    <h3>Verify invalid email formats are rejected (missing @, missing domain, missing local part, double @, embedded space)</h3>
+    <p class="desc">Confirms that malformed email addresses cannot be used to sign in, and checks the on-blur email validation that the PRD requires.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. Run steps 1-7 once for each email in Test Data, in the order listed.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Row 1 (missing @):</span> <code class="data">jane.doe.example.com</code></li><li><span class="dl">Row 2 (missing domain):</span> <code class="data">jane.doe@</code></li><li><span class="dl">Row 3 (missing local part):</span> <code class="data">@example.com</code></li><li><span class="dl">Row 4 (double @):</span> <code class="data">jane.doe@@example.com</code></li><li><span class="dl">Row 5 (embedded space):</span> <code class="data">jane doe@example.com</code></li><li><span class="dl">Password for every row:</span> <code class="data">Wrong#Pass2026</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Type the email from the current data row in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">2</td><td>Press Tab to move the cursor to the Password field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Check the Email address field for a validation message.</td><td>Per the PRD (Real-time Validation on blur; Email Format Verification), an email-format message is shown for the field. Exact message text: <mark class="unk">Insufficient information to determine.</mark> Observed on 24-Nov-2026: no message is shown. Log this as a PRD deviation (<a class="ref" href="#GAP-03">GAP-03</a>, <a class="ref" href="#GAP-04">GAP-04</a>).</td></tr><tr class="nocheck"><td class="n">4</td><td>Type the test password in the <span class="ui">"Password"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">5</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">6</td><td>Check the message displayed and the address bar.</td><td>The message <span class="ui">"Your email, password, IP address or location did not match"</span> is displayed and the URL remains https://app.vwo.com/#/login.</td></tr><tr class="nocheck"><td class="n">7</td><td>Open https://app.vwo.com/#/login again before the next data row.</td><td><span class="na">No check at this step</span></td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Email Format Verification</li><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Real-time Validation</li><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-06">OBS-06</a> (all 5 rows on app.wingify.com, 24-Nov-2026; row 1 also on app.vwo.com, 24-Nov-2026). <a class="ref" href="#OBS-09">OBS-09</a> (no on-blur message, app.wingify.com, 24-Nov-2026).</dd></div>
+    <div><dt>Verification status</dt><dd>Steps 5-6 verified for all 5 rows. Step 3 does not meet the PRD on the live page (<a class="ref" href="#GAP-03">GAP-03</a>, <a class="ref" href="#GAP-04">GAP-04</a>): raise this with the Product Owner before marking pass or fail.</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Partly automated: <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code> TC_I02 covers <span class="ui">"not-an-email"</span>; add the 5 rows as data.</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-008">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-008</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: Highest</span>
+      <span class="chip lbl">error-handling</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify error handling when an unregistered email and an incorrect password are submitted</h3>
+    <p class="desc">Confirms that an unknown account is rejected with an error message, that the user stays on the login page, and how the fields are left for the next attempt.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. The test email is not registered with VWO (it uses the reserved example.com domain).</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <code class="data">qa.unregistered.user@example.com</code></li><li><span class="dl">Password:</span> <code class="data">Wrong#Pass2026</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Type the test email in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">2</td><td>Type the test password in the <span class="ui">"Password"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">4</td><td>Check the message displayed and the address bar.</td><td>The message <span class="ui">"Your email, password, IP address or location did not match"</span> is displayed and the URL remains https://app.vwo.com/#/login.</td></tr><tr><td class="n">5</td><td>Check the contents of the Email address and Password fields.</td><td>The Email address field still contains qa.unregistered.user@example.com and the Password field is empty.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Error Identification</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-06">OBS-06</a>, <a class="ref" href="#OBS-07">OBS-07</a> (app.vwo.com and app.wingify.com, 24-Nov-2026). Automated TC_I04 (app.wingify.com, 20-Nov-2026).</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page.</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Automated: <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code> TC_I04 (the step 5 field checks are a candidate addition)</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-009">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-009</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: Highest</span>
+      <span class="chip lbl">error-handling</span>
+      <span class="chip st blocked">Not executed</span>
+    </div>
+    <h3>Verify login is rejected for a registered email with an incorrect password</h3>
+    <p class="desc">Confirms that a wrong password for a real account is rejected and the user stays on the login page.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. An active, registered VWO test account exists. Its credentials come from the team's secure vault and are never written into the test case.</li><li>2. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>3. Run this test once per session. The PRD mentions request throttling but gives no lockout threshold (<a class="ref" href="#GAP-11">GAP-11</a>), so keep attempts on the shared test account to a minimum.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Email:</span> <code>&lt;VALID_USERNAME&gt;</code> <span class="muted">(registered test account, from the vault)</span></li><li><span class="dl">Password:</span> <code class="data">Wrong#Pass2026</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr class="nocheck"><td class="n">1</td><td>Type the registered email in the <span class="ui">"Email address"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">2</td><td>Type the incorrect password in the <span class="ui">"Password"</span> field.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Click <span class="ui">"Sign in"</span>.</td><td>The user is not signed in.</td></tr><tr><td class="n">4</td><td>Check the message displayed and the address bar.</td><td>An error message is displayed (PRD: Error Handling) and the URL remains https://app.vwo.com/#/login. Expected message text: <mark class="inf">Inference (low confidence)</mark>: <span class="ui">"Your email, password, IP address or location did not match"</span>, the message shown for every other failed sign-in; not yet observed for a registered account.</td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; User Input Validation &rsaquo; Error Handling</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Error Identification</li><li>PRD &rsaquo; Technical Requirements &rsaquo; Compliance Standards &rsaquo; Rate Limiting</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd>PRD (Error Handling; Rate Limiting). <a class="ref" href="#OBS-06">OBS-06</a> is the basis for the inferred message text.</dd></div>
+    <div><dt>Verification status</dt><dd>Not executed: needs a registered account (<a class="ref" href="#GAP-01">GAP-01</a>). The message text is an inference (<a class="ref" href="#GAP-10">GAP-10</a>).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Candidate: add to <code>PlaywriteFramework/Output/tests/invalid-login.spec.ts</code> once credentials are available in .env</dd></div>
+  </dl>
+</article>
+
+<article class="tc" id="VWO-LOGIN-TC-010">
+  <header class="tc-head">
+    <div class="tc-top">
+      <span class="tc-id">VWO-LOGIN-TC-010</span>
+      <span class="chip neg">Negative</span>
+      <span class="chip prio">Priority: High</span>
+      <span class="chip lbl">error-handling</span>
+      <span class="chip st ok">Verified</span>
+    </div>
+    <h3>Verify Forgot Password error handling for empty, malformed and unregistered email addresses</h3>
+    <p class="desc">Confirms that <span class="ui">"Forgot Password?"</span> opens the reset form, that <span class="ui">"Back"</span> returns to the login form, and how the reset form responds to bad input.</p>
+  </header>
+  <div class="grid2">
+    <section><h4>Preconditions</h4><ul class="plain"><li>1. A new Chrome Incognito window shows https://app.vwo.com/#/login.</li><li>2. Run steps 4-6 once for each email in Test Data, in the order listed.</li></ul></section>
+    <section><h4>Test data</h4><ul class="plain"><li><span class="dl">Row 1 (empty):</span> <span class="muted">(leave empty)</span></li><li><span class="dl">Row 2 (malformed):</span> <code class="data">jane.doe.example.com</code></li><li><span class="dl">Row 3 (unregistered):</span> <code class="data">qa.unregistered.user@example.com</code></li></ul></section>
+  </div>
+  <table class="steps">
+    <colgroup><col class="c-n"><col class="c-step"><col class="c-exp"></colgroup>
+    <thead><tr><th>#</th><th>Test step</th><th>Expected result</th></tr></thead>
+    <tbody><tr><td class="n">1</td><td>Click <span class="ui">"Forgot Password?"</span> and check the form that opens.</td><td>A reset form shows an <span class="ui">"Email address"</span> field with the cursor in it, a <span class="ui">"Back"</span> button and a <span class="ui">"Reset Password"</span> button.</td></tr><tr class="nocheck"><td class="n">2</td><td>Click <span class="ui">"Back"</span>.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">3</td><td>Check the form that is displayed.</td><td>The login form is displayed again.</td></tr><tr class="nocheck"><td class="n">4</td><td>Open https://app.vwo.com/#/login again, then click <span class="ui">"Forgot Password?"</span>.</td><td><span class="na">No check at this step</span></td></tr><tr class="nocheck"><td class="n">5</td><td>Type the email from the current data row in the <span class="ui">"Email address"</span> field (leave it empty for row 1), then click <span class="ui">"Reset Password"</span>.</td><td><span class="na">No check at this step</span></td></tr><tr><td class="n">6</td><td>Check the messages displayed and the address bar.</td><td><ul class="rows"><li><span class="dl">Row 1:</span> The message <span class="ui">"Incorrect user input"</span> is displayed.</li><li><span class="dl">Row 2:</span> The text <span class="ui">"Invalid email"</span> appears with the Email address field, and the message <span class="ui">"If you are registered with us, you will receive a reset email from hello@wingify.com. If you don't see it in your inbox, please check your Spam folder."</span> is displayed.</li><li><span class="dl">Row 3:</span> The message <span class="ui">"If you are registered with us, you will receive a reset email from hello@wingify.com. If you don't see it in your inbox, please check your Spam folder."</span> is displayed and the URL is https://app.vwo.com/#/forgot-password.</li></ul></td></tr></tbody>
+  </table>
+  <dl class="meta">
+    <div><dt>Requirement reference</dt><dd><ul class="plain"><li>PRD &rsaquo; Functional Requirements &rsaquo; Password Management &rsaquo; Forgot Password Flow</li><li>PRD &rsaquo; Functional Requirements &rsaquo; Password Management &rsaquo; Password Recovery</li><li>PRD &rsaquo; User Journey and Flow &rsaquo; Error Recovery Flow &rsaquo; Recovery Options</li></ul></dd></div>
+    <div><dt>Evidence source</dt><dd><a class="ref" href="#OBS-10">OBS-10</a> (rows 1-2 on app.wingify.com; row 3 on app.vwo.com and app.wingify.com; 24-Nov-2026). Open and Back: automated TC_V05 (20-Nov-2026) and live check (24-Nov-2026).</dd></div>
+    <div><dt>Verification status</dt><dd>Verified on the live page. Row 2 shows both <span class="ui">"Invalid email"</span> and the reset-email message; which response is intended: <mark class="unk">Insufficient information to determine.</mark> (<a class="ref" href="#GAP-16">GAP-16</a>). Delivery of the reset email to a registered mailbox is not covered (<a class="ref" href="#GAP-01">GAP-01</a>, <a class="ref" href="#GAP-16">GAP-16</a>).</dd></div>
+    <div><dt>Automation</dt><dd>Yes: Partly automated: <code>PlaywriteFramework/Output/tests/valid-login.spec.ts</code> TC_V05 covers open and Back; add the rows as data.</dd></div>
+  </dl>
+</article>
+<p><strong>Columns:</strong> Test Case ID, Summary, Issue Type, Priority, Component/s, Labels, Test Type, Requirement Reference, Description, Preconditions, Test Steps, Test Data, Expected Result, Evidence Source, Verification Status, Automation Candidate, Automation Reference, Environment.</p>
+<p><strong>Jira import mapping:</strong></p>
+<ol class="md"><li>Use <em>Jira Settings &gt; System &gt; External System Import &gt; CSV</em>, or your Xray or Zephyr test importer.</li><li>Map these columns to the Jira fields of the same name: <em>Summary</em>, <em>Issue Type</em>, <em>Priority</em>, <em>Component/s</em>, <em>Labels</em> and <em>Description</em>.</li><li>Map the remaining columns to custom fields. If your project has no such fields, append them to Description.</li><li><code>Issue Type = Test</code> needs Xray or Zephyr. Without either, change it to <code>Task</code> before importing.</li><li>The <code>Login</code> component must already exist, or you must let the importer create it.</li></ol>
+</div>
+
+<h2 class="sec" id="self-validation"><span class="num">4</span> Self-Validation Check</h2>
+<div class="sec-body">
+<div class="tbl"><table class="data"><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody><tr><td>Every expected result traces to a PRD item (P-xx) or a live observation (OBS-xx)</td><td>Pass. All 10 rows cite PRD or OBS in <em>Evidence Source</em>.</td></tr><tr><td>No invented UI text or error messages</td><td>Pass. All 16 quoted labels and messages in the CSV were matched, character for character, against the raw observation logs.</td></tr><tr><td>Unknowns stated as &quot;<mark class="unk">Insufficient information to determine.</mark>&quot;</td><td>Pass. It is used 5 times (<a class="ref" href="#GAP-02">GAP-02</a> twice, <a class="ref" href="#GAP-03">GAP-03</a>/04, <a class="ref" href="#GAP-12">GAP-12</a>, <a class="ref" href="#GAP-16">GAP-16</a>).</td></tr><tr><td>Inferences labelled &quot;<mark class="inf">Inference (low confidence)</mark>&quot;</td><td>Pass. There is 1 inference: the <a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a> message text (<a class="ref" href="#GAP-10">GAP-10</a>).</td></tr><tr><td>No assumed &quot;typical&quot; behaviour</td><td>Pass. Behaviour the PRD claims but the page doesn't show is reported as a conflict (<a class="ref" href="#GAP-03">GAP-03</a> to <a class="ref" href="#GAP-09">GAP-09</a>), not written as a passing expectation.</td></tr><tr><td>PRD conflicts not hidden</td><td>Pass. <a class="ref" href="#VWO-LOGIN-TC-007">TC-007</a> step 3 keeps the PRD expectation and flags the observed deviation.</td></tr><tr><td>Deterministic and repeatable</td><td>Pass. IDs, data, step order and wording are fixed. Data rows run in a stated order on a freshly opened page.</td></tr><tr><td>Unique IDs, positive and negative coverage</td><td>Pass. VWO-LOGIN-TC-001 to <a class="ref" href="#VWO-LOGIN-TC-010">TC-010</a> are unique: 3 positive and 7 negative. They cover valid login, empty fields, invalid email formats and error handling.</td></tr><tr><td>No real credentials or personal data</td><td>Pass. Valid credentials are vault placeholders (<code>&lt;VALID_USERNAME&gt;</code>, <code>&lt;VALID_PASSWORD&gt;</code>). Synthetic emails use <code>example.com</code>.</td></tr><tr><td>No unsafe testing of production</td><td>Pass. There are no brute-force or lockout steps, and <a class="ref" href="#VWO-LOGIN-TC-009">TC-009</a> limits attempts (<a class="ref" href="#GAP-11">GAP-11</a>).</td></tr><tr><td>CSV well-formed</td><td>Pass. 10 records with 18 fields each, confirmed by an independent parser.</td></tr></tbody></table></div>
+</div>
+
+<footer class="end">TestCase_Anti-hallucination &middot; VWO Login &middot; Generated from VWO_Login_TestCases_Jira.csv and VWO_Login_TestCases_Validation.md</footer>
+</div>
+</body>
+</html>
