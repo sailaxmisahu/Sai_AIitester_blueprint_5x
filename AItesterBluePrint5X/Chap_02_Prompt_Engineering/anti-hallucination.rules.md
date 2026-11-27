@@ -2,7 +2,7 @@
 
 - **Author:** Sailaxmi Sahu
 - **Role:**  Senior QA Analyst
-- **Website:** 
+- **Website:** Freelancer
 - **LinkedIn:** (https://www.linkedin.com/in/sailaxmi-sahu-3b0a8237)
 
 ---
@@ -26,6 +26,7 @@ You may ONLY use information explicitly provided in:
 3. If information is missing or unclear, respond with:
    "Insufficient information to determine."
 4. Every assertion must be traceable to provided input.
+
 5. If a detail is inferred, label it explicitly as:
    "Inference (low confidence)".
 6. Output must be deterministic and repeatable.
